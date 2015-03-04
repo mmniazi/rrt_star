@@ -3,26 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace SSL_HUB
+namespace SSL_HUB.Central
 {
     public partial class Form1 : Form
     {
         private const float Velocity = 1;
         private const float AngularVelocity = (float) (Math.PI/2);
-        private readonly List<Robot> _blueRobots;
-        private readonly List<Robot> _yellowRobots;
+        public List<Robot> BlueRobots { get; private set; }
+        public List<Robot> YellowRobots { get; private set; }
+        public int Radius { get; private set; }
+        public int FieldWidth { get; private set; }
+        public int FieldHeight { get; private set; }
 
         public Form1()
         {
             InitializeComponent();
 
-            _blueRobots = new List<Robot>(6);
-            _yellowRobots = new List<Robot>(6);
+            BlueRobots = new List<Robot>(6);
+            YellowRobots = new List<Robot>(6);
+            Radius = 1;
+            FieldWidth = 6000;
+            FieldHeight = 4000;
 
             for (var i = 0; i < 6; i++)
             {
-                _yellowRobots.Add(new Robot(true, i, Velocity, AngularVelocity));
-                _blueRobots.Add(new Robot(false, i, Velocity, AngularVelocity));
+                YellowRobots.Add(new Robot(true, i, Velocity, AngularVelocity, this));
+                BlueRobots.Add(new Robot(false, i, Velocity, AngularVelocity, this));
             }
         }
 
@@ -35,11 +41,11 @@ namespace SSL_HUB
 
             if (IsYellow.Checked)
             {
-                _yellowRobots.ElementAt(id).SetGoal(x, y, angle);
+                YellowRobots.ElementAt(id).SetGoal(x, y, angle);
             }
             else
             {
-                _blueRobots.ElementAt(id).SetGoal(x, y, angle);
+                BlueRobots.ElementAt(id).SetGoal(x, y, angle);
             }
         }
 
@@ -55,7 +61,7 @@ namespace SSL_HUB
                 var goalY = data.detection.balls[0].y;
                 var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
 
-                _yellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                YellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
             }
             else
             {
@@ -67,7 +73,7 @@ namespace SSL_HUB
                 var goalY = data.detection.balls[0].y;
                 var goalAngle = (float) (Math.Atan2(goalY - currentY, goalX - currentX));
 
-                _blueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
             }
         }
 
@@ -76,11 +82,11 @@ namespace SSL_HUB
             var id = Convert.ToInt32(Id.Text);
             if (IsYellow.Checked)
             {
-                _yellowRobots.ElementAt(id).Stop();
+                YellowRobots.ElementAt(id).Stop();
             }
             else
             {
-                _blueRobots.ElementAt(id).Stop();
+                BlueRobots.ElementAt(id).Stop();
             }
         }
     }

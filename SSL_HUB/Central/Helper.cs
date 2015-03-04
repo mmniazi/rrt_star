@@ -7,7 +7,7 @@ using grSim;
 using messages_robocup_ssl_wrapper;
 using ProtoBuf;
 
-namespace SSL_HUB
+namespace SSL_HUB.Central
 {
     internal static class Helper
     {

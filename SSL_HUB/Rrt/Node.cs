@@ -2,7 +2,7 @@
 
 namespace SSL_HUB.Rrt
 {
-    internal class Node
+    public class Node
     {
         public Node(int x, int y)
         {
@@ -45,11 +45,6 @@ namespace SSL_HUB.Rrt
         public void RemoveChild(Node child)
         {
             Children.Remove(child);
-        }
-
-        public override string ToString()
-        {
-            return X + "," + Y;
         }
     }
 }

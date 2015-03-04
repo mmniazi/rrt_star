@@ -1,4 +1,4 @@
-﻿namespace SSL_HUB
+﻿namespace SSL_HUB.Central
 {
     partial class Form1
     {

@@ -1,21 +1,26 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using SSL_HUB.Rrt;
 
-namespace SSL_HUB
+namespace SSL_HUB.Central
 {
-    internal class Robot
+    public class Robot
     {
         private const double RobotRadius = 0.0875;
         private const double WheelRadius = 0.0289;
         private const float Zero = (float) 0.000000000001;
+        private readonly Rrt.Rrt _rrt;
 
-        public Robot(bool isYellow, int id, float velocity, float angularVelocity)
+        public Robot(bool isYellow, int id, float velocity, float angularVelocity, Form1 controller)
         {
             IsYellow = isYellow;
             Id = id;
             Velocity = velocity;
             AngularVelocity = angularVelocity;
             Moving = false;
+            _rrt = new Rrt.Rrt(controller.Radius/10, controller.FieldWidth/10, controller.FieldHeight/10);
             new Thread(MoveRobot).Start();
         }
 
@@ -30,7 +35,7 @@ namespace SSL_HUB
         public float CurrentY { get; private set; }
         public float CurrentAngle { get; private set; }
         public bool Moving { get; private set; }
-
+        public List<Node> Path { get; private set; }
 
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
@@ -44,10 +49,9 @@ namespace SSL_HUB
         {
             while (true)
             {
-                Thread.Sleep(10);
-
                 if (!Moving)
                 {
+                    Thread.Sleep(10);
                     Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero);
                 }
                 else
@@ -66,15 +70,19 @@ namespace SSL_HUB
                         CurrentAngle = data.detection.robots_blue[Id].orientation;
                     }
 
-                    var theeta = Math.Atan2(GoalY - CurrentY, GoalX - CurrentX) - CurrentAngle;
-                    var distance = Math.Sqrt(Math.Pow(CurrentX - GoalX, 2) + Math.Pow(CurrentY - GoalY, 2));
+                    CalculatePath();
+                    var goalX = Path.First().X;
+                    var goalY = Path.First().Y;
+
+                    var theeta = Math.Atan2(goalY - CurrentY, goalX - CurrentX) - CurrentAngle;
+                    var distance = Math.Sqrt(Math.Pow(CurrentX - goalX, 2) + Math.Pow(CurrentY - goalY, 2));
                     double vx, vy, vw;
                     double[] motorAlpha = {Helper.Dtr(45), Helper.Dtr(120), Helper.Dtr(-120), Helper.Dtr(-45)};
 
                     if (distance > 100 && Math.Abs(Helper.Rtd(GoalAngle - CurrentAngle)) > 5)
                     {
                         vx = Velocity*Math.Cos(theeta);
-                        vy = Velocity * Math.Sin(theeta);
+                        vy = Velocity*Math.Sin(theeta);
                         vw = AngularVelocity;
                     }
                     else if (distance > 100)
@@ -94,7 +102,14 @@ namespace SSL_HUB
                         vx = 0;
                         vy = 0;
                         vw = 0;
-                        Moving = false;
+                        if (Path.Count == 1)
+                        {
+                            Moving = false;
+                        }
+                        else
+                        {
+                            Path.RemoveAt(0);
+                        }
                     }
 
                     var v1 =
@@ -116,6 +131,34 @@ namespace SSL_HUB
 
                     Helper.SendData(IsYellow, Id, v1, v2, v3, v4);
                 }
+            }
+        }
+
+        private void CalculatePath()
+        {
+            var data = Helper.GetData();
+            var obstacles = new List<Node>();
+
+            obstacles.AddRange(data.detection.robots_yellow.Select(robot => new Node((int) robot.x/10, (int) robot.y/10)));
+            obstacles.AddRange(data.detection.robots_blue.Select(robot => new Node((int) robot.x/10, (int) robot.y/10)));
+
+            if (IsYellow)
+            {
+                obstacles.RemoveAt(Id);
+            }
+            else
+            {
+                obstacles.RemoveAt(Id + 6);
+            }
+
+            _rrt.SetConditions(new Node((int) CurrentX/10, (int) CurrentY/10), new Node((int) GoalX/10, (int) GoalY/10),
+                obstacles);
+
+            var scaledPath = _rrt.GetPath();
+            Path.Clear();
+            foreach (var node in scaledPath)
+            {
+                Path.Add(new Node(node.X*10, node.Y*10));
             }
         }
 

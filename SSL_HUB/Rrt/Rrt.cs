@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SSL_HUB.Rrt
 {
-    internal class Rrt
+    public class Rrt
     {
         private readonly int _edgeLength;
         private readonly int _fieldHeight;
@@ -12,43 +12,49 @@ namespace SSL_HUB.Rrt
         private readonly bool[][] _goalPoints;
         private readonly int _iterations;
         private readonly bool[][] _obstaclePoints;
-        private readonly Tree _tree;
+        private readonly int _radius;
         private readonly int _tryGoalFactor;
+        private List<Node> _currentPath;
         private Node _goalNode;
         private bool _goalReached;
         private List<Node> _nearestNodes;
         private int _neighbourRadius;
+        private Tree _tree;
 
-        public Rrt(Node startNode, Node goalNode, IEnumerable<Node> obstacles, int radius, int fieldWidth,
-            int fieldHeight, int tryGoalFactor, int iterations, int neighbourRadius, int edgeLength)
+        public Rrt(int radius, int fieldWidth, int fieldHeight)
         {
-            _tree = new Tree(startNode.X, startNode.Y);
-            _goalPoints = new bool[fieldWidth + 1][];
-            _obstaclePoints = new bool[fieldWidth + 1][];
             _fieldWidth = fieldWidth;
             _fieldHeight = fieldHeight;
-            _tryGoalFactor = tryGoalFactor;
-            _iterations = iterations;
-            _goalNode = goalNode;
-            _neighbourRadius = neighbourRadius;
+            _radius = radius;
+            _goalPoints = new bool[fieldWidth + 1][];
+            _obstaclePoints = new bool[fieldWidth + 1][];
+            _tryGoalFactor = 5;
+            _iterations = 1;
+            _neighbourRadius = 1000;
             _goalReached = false;
             _nearestNodes = new List<Node>();
-            _edgeLength = edgeLength;
+            _edgeLength = 50;
+            _currentPath = new List<Node>();
+        }
 
-            for (var i = 0; i <= fieldWidth; i++)
+        public void SetConditions(Node startNode, Node goalNode, IEnumerable<Node> obstacles)
+        {
+            _tree = new Tree(startNode.X, startNode.Y);
+            _goalNode = goalNode;
+            for (var i = 0; i <= _fieldWidth; i++)
             {
-                _goalPoints[i] = new bool[fieldHeight + 1];
-                _obstaclePoints[i] = new bool[fieldHeight + 1];
+                _goalPoints[i] = new bool[_fieldHeight + 1];
+                _obstaclePoints[i] = new bool[_fieldHeight + 1];
             }
 
             foreach (var obstacle in obstacles)
             {
-                for (var x = obstacle.X - radius; x < obstacle.X + radius; x++)
+                for (var x = obstacle.X - _radius; x < obstacle.X + _radius; x++)
                 {
-                    for (var y = obstacle.Y - radius; y < obstacle.Y + radius; y++)
+                    for (var y = obstacle.Y - _radius; y < obstacle.Y + _radius; y++)
                     {
-                        if ((x - obstacle.X)*(x - obstacle.X) + (y - obstacle.Y)*(y - obstacle.Y) <= radius*radius &&
-                            x >= 0 && y >= 0 && x <= fieldWidth && y <= fieldHeight)
+                        if ((x - obstacle.X)*(x - obstacle.X) + (y - obstacle.Y)*(y - obstacle.Y) <= _radius*_radius &&
+                            x >= 0 && y >= 0 && x <= _fieldWidth && y <= _fieldHeight)
                         {
                             _obstaclePoints[x][y] = true;
                         }
@@ -56,12 +62,12 @@ namespace SSL_HUB.Rrt
                 }
             }
 
-            for (var x = goalNode.X - radius; x <= goalNode.X + radius; x++)
+            for (var x = goalNode.X - _radius; x <= goalNode.X + _radius; x++)
             {
-                for (var y = goalNode.Y - radius; y <= goalNode.Y + radius; y++)
+                for (var y = goalNode.Y - _radius; y <= goalNode.Y + _radius; y++)
                 {
-                    if ((x - goalNode.X)*(x - goalNode.X) + (y - goalNode.Y)*(y - goalNode.Y) <= radius*radius && x >= 0 &&
-                        y >= 0 && x <= fieldWidth && y <= fieldHeight)
+                    if ((x - goalNode.X)*(x - goalNode.X) + (y - goalNode.Y)*(y - goalNode.Y) <= _radius*_radius &&
+                        x >= 0 && y >= 0 && x <= _fieldWidth && y <= _fieldHeight)
                     {
                         _goalPoints[x][y] = true;
                     }
@@ -69,7 +75,28 @@ namespace SSL_HUB.Rrt
             }
         }
 
-        public List<Node> FindPath()
+        public List<Node> GetPath()
+        {
+            if (_currentPath.Count == 0 || _currentPath.Last() != _goalNode || !IsValidPath())
+            {
+                CalcPath();
+            }
+            return _currentPath;
+        }
+
+        private bool IsValidPath()
+        {
+            for (var i = 0; i < _currentPath.Count - 1; i++)
+            {
+                if (!IsValidNode(_currentPath.ElementAt(i), _currentPath.ElementAt(i + 1)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public void CalcPath()
         {
             for (var i = 0; i < _iterations || !_goalReached; i++)
             {
@@ -121,7 +148,7 @@ namespace SSL_HUB.Rrt
                 }
             }
 
-            return SmoothPath(GetPath(_goalNode));
+            _currentPath = SmoothPath(FindPath(_goalNode));
         }
 
         private List<Node> SmoothPath(IReadOnlyCollection<Node> path)
@@ -450,7 +477,7 @@ namespace SSL_HUB.Rrt
             return Math.Sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
         }
 
-        public List<Node> GetPath(Node end)
+        public List<Node> FindPath(Node end)
         {
             var path = new List<Node> {end};
             var node = end;
@@ -463,25 +490,6 @@ namespace SSL_HUB.Rrt
                     return path;
                 }
             }
-        }
-
-        /*--------------Debugging--------------*/
-
-        public Tree GetTree()
-        {
-            return _tree;
-        }
-    }
-
-    public struct Point
-    {
-        public int X;
-        public int Y;
-
-        public Point(int x, int y)
-        {
-            X = x;
-            Y = y;
         }
     }
 }
