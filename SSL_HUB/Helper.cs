@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 using grSim;
 using messages_robocup_ssl_wrapper;
 using ProtoBuf;
@@ -11,6 +12,7 @@ namespace SSL_HUB
     internal static class Helper
     {
         private static readonly UdpClient Client;
+        private static Byte[] _data;
 
         static Helper()
         {
@@ -19,6 +21,7 @@ namespace SSL_HUB
             Client.ExclusiveAddressUse = false;
             Client.Client.Bind(new IPEndPoint(IPAddress.Any, 10020));
             Client.JoinMulticastGroup(IPAddress.Parse("224.5.23.2"));
+            new Thread(RecieveData).Start();
         }
 
         public static double Dtr(double angle)
@@ -31,11 +34,9 @@ namespace SSL_HUB
             return angle*(180/Math.PI);
         }
 
-        public static SSL_WrapperPacket ReceiveData()
+        public static SSL_WrapperPacket GetData()
         {
-            var endPoint = new IPEndPoint(IPAddress.Any, 10020);
-            var data = Client.Receive(ref endPoint);
-            return Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(data));
+            return Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(_data));
         }
 
         public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4)
@@ -63,6 +64,16 @@ namespace SSL_HUB
             Serializer.Serialize(stream, pkt);
             var array = stream.ToArray();
             Client.Send(array, array.Length, new IPEndPoint(IPAddress.Broadcast, 20011));
+        }
+
+        private static void RecieveData()
+        {
+            var endPoint = new IPEndPoint(IPAddress.Any, 10020);
+            while (true)
+            {
+                Thread.Sleep(10);
+                _data = Client.Receive(ref endPoint);
+            }
         }
     }
 }

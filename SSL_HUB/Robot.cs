@@ -36,7 +36,7 @@ namespace SSL_HUB
             GoalAngle = (float) goalAngle;
             Moving = true;
         }
-        // TODO: make recieving a seprate thread
+
         private void MoveRobot()
         {
             while (true)
@@ -46,22 +46,21 @@ namespace SSL_HUB
                 if (!Moving)
                 {
                     Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero);
-//                    Helper.ReceiveData();
                 }
                 else
                 {
-                    var wrapper = Helper.ReceiveData();
+                    var data = Helper.GetData();
                     if (IsYellow)
                     {
-                        CurrentX = wrapper.detection.robots_yellow[Id].x;
-                        CurrentY = wrapper.detection.robots_yellow[Id].y;
-                        CurrentAngle = wrapper.detection.robots_yellow[Id].orientation;
+                        CurrentX = data.detection.robots_yellow[Id].x;
+                        CurrentY = data.detection.robots_yellow[Id].y;
+                        CurrentAngle = data.detection.robots_yellow[Id].orientation;
                     }
                     else
                     {
-                        CurrentX = wrapper.detection.robots_blue[Id].x;
-                        CurrentY = wrapper.detection.robots_blue[Id].y;
-                        CurrentAngle = wrapper.detection.robots_blue[Id].orientation;
+                        CurrentX = data.detection.robots_blue[Id].x;
+                        CurrentY = data.detection.robots_blue[Id].y;
+                        CurrentAngle = data.detection.robots_blue[Id].orientation;
                     }
 
                     var theeta = Math.Atan2(GoalY - CurrentY, GoalX - CurrentX) - CurrentAngle;

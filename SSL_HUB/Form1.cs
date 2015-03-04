@@ -46,11 +46,11 @@ namespace SSL_HUB
             if (IsYellow.Checked)
             {
                 var id = Convert.ToInt32(Id.Text);
-                var wrapper = Helper.ReceiveData();
-                var currentX = wrapper.detection.robots_yellow[id].x;
-                var currentY = wrapper.detection.robots_yellow[id].y;
-                var goalX = wrapper.detection.balls[0].x;
-                var goalY = wrapper.detection.balls[0].y;
+                var data = Helper.GetData();
+                var currentX = data.detection.robots_yellow[id].x;
+                var currentY = data.detection.robots_yellow[id].y;
+                var goalX = data.detection.balls[0].x;
+                var goalY = data.detection.balls[0].y;
                 var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
 
                 _yellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
@@ -58,11 +58,11 @@ namespace SSL_HUB
             else
             {
                 var id = Convert.ToInt32(Id.Text);
-                var wrapper = Helper.ReceiveData();
-                var currentX = wrapper.detection.robots_blue[id].x;
-                var currentY = wrapper.detection.robots_blue[id].y;
-                var goalX = wrapper.detection.balls[0].x;
-                var goalY = wrapper.detection.balls[0].y;
+                var data = Helper.GetData();
+                var currentX = data.detection.robots_blue[id].x;
+                var currentY = data.detection.robots_blue[id].y;
+                var goalX = data.detection.balls[0].x;
+                var goalY = data.detection.balls[0].y;
                 var goalAngle = (float) (Math.Atan2(goalY - currentY, goalX - currentX));
 
                 _blueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
