@@ -9,17 +9,19 @@ namespace SSL_HUB
         private const double WheelRadius = 0.0289;
         private const float Zero = (float) 0.000000000001;
 
-        public Robot(bool isYellow, int id, float velocity)
+        public Robot(bool isYellow, int id, float velocity, float angularVelocity)
         {
             IsYellow = isYellow;
             Id = id;
             Velocity = velocity;
+            AngularVelocity = angularVelocity;
             Moving = false;
             new Thread(MoveRobot).Start();
         }
 
         public int Id { get; private set; }
         public float Velocity { get; set; }
+        public float AngularVelocity { get; set; }
         public bool IsYellow { get; private set; }
         public float GoalX { get; private set; }
         public float GoalY { get; private set; }
@@ -71,8 +73,8 @@ namespace SSL_HUB
                     if (distance > 100 && Math.Abs(Helper.Rtd(GoalAngle - CurrentAngle)) > 5)
                     {
                         vx = Velocity*Math.Cos(theeta);
-                        vy = Velocity*Math.Sin(theeta);
-                        vw = GoalAngle - CurrentAngle;
+                        vy = Velocity * Math.Sin(theeta);
+                        vw = AngularVelocity;
                     }
                     else if (distance > 100)
                     {
@@ -84,7 +86,7 @@ namespace SSL_HUB
                     {
                         vx = 0;
                         vy = 0;
-                        vw = GoalAngle - CurrentAngle;
+                        vw = AngularVelocity;
                     }
                     else
                     {

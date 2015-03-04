@@ -7,6 +7,8 @@ namespace SSL_HUB
 {
     public partial class Form1 : Form
     {
+        private const float Velocity = 1;
+        private const float AngularVelocity = (float) (Math.PI/2);
         private readonly List<Robot> _blueRobots;
         private readonly List<Robot> _yellowRobots;
 
@@ -19,8 +21,8 @@ namespace SSL_HUB
 
             for (var i = 0; i < 6; i++)
             {
-                _yellowRobots.Add(new Robot(true, i, 1));
-                _blueRobots.Add(new Robot(false, i, 1));
+                _yellowRobots.Add(new Robot(true, i, Velocity, AngularVelocity));
+                _blueRobots.Add(new Robot(false, i, Velocity, AngularVelocity));
             }
         }
 
