@@ -31,6 +31,7 @@ namespace SSL_HUB
         public float CurrentAngle { get; private set; }
         public bool Moving { get; private set; }
 
+
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
             GoalX = (float) goalX;
