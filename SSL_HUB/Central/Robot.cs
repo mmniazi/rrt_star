@@ -45,7 +45,7 @@ namespace SSL_HUB.Central
             GoalAngle = (float) goalAngle;
             Moving = true;
         }
-        // TODO: robot vibrating at angles greater then 180 and path is not smooth
+        // TODO: path is not smooth
         private void MoveRobot()
         {
             while (true)
@@ -82,7 +82,7 @@ namespace SSL_HUB.Central
                     double vx, vy, vw;
                     double[] motorAlpha = {Helper.Dtr(45), Helper.Dtr(120), Helper.Dtr(-120), Helper.Dtr(-45)};
 
-                    if (distance > 100 && Math.Abs(Helper.Rtd(GoalAngle - CurrentAngle)) > 5)
+                    if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
@@ -101,7 +101,7 @@ namespace SSL_HUB.Central
                         vy = Velocity*Math.Sin(theeta);
                         vw = Zero;
                     }
-                    else if (Math.Abs(Helper.Rtd(GoalAngle - CurrentAngle)) > 5)
+                    else if (Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
                     {
                         vx = Zero;
                         vy = Zero;
