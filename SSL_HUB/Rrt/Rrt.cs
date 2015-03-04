@@ -16,7 +16,6 @@ namespace SSL_HUB.Rrt
         private readonly int _tryGoalFactor;
         private List<Node> _currentPath;
         private Node _goalNode;
-        private bool _goalReached;
         private List<Node> _nearestNodes;
         private int _neighbourRadius;
         private Tree _tree;
@@ -31,7 +30,6 @@ namespace SSL_HUB.Rrt
             _tryGoalFactor = 5;
             _iterations = 1;
             _neighbourRadius = 1000;
-            _goalReached = false;
             _nearestNodes = new List<Node>();
             _edgeLength = 50;
             _currentPath = new List<Node>();
@@ -98,7 +96,8 @@ namespace SSL_HUB.Rrt
 
         public void CalcPath()
         {
-            for (var i = 0; i < _iterations || !_goalReached; i++)
+            bool goalReached = false;
+            for (var i = 0; i < _iterations || !goalReached; i++)
             {
                 var randomNode = i%_tryGoalFactor == 0
                     ? _goalNode
@@ -124,11 +123,10 @@ namespace SSL_HUB.Rrt
                         _tree.Add(nearestNode, intermediateNode);
                         nearestNode = intermediateNode;
                     }
-                    if (_goalPoints[randomNode.X][randomNode.Y] && !_goalReached)
+                    if (_goalPoints[randomNode.X][randomNode.Y] && !goalReached)
                     {
-                        intermediateNode.SetCoordinate(_goalNode.X, _goalNode.Y);
-                        _goalNode = intermediateNode;
-                        _goalReached = true;
+                        _tree.Add(intermediateNode, _goalNode);
+                        goalReached = true;
                     }
                     foreach (var thisNode in _nearestNodes)
                     {
@@ -485,7 +483,7 @@ namespace SSL_HUB.Rrt
             {
                 node = node.Parent;
                 path.Add(node);
-                if (node == _tree.Root)
+                if (node.Parent == _tree.Root)
                 {
                     return path;
                 }

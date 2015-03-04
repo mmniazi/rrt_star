@@ -20,6 +20,7 @@ namespace SSL_HUB.Central
             Velocity = velocity;
             AngularVelocity = angularVelocity;
             Moving = false;
+            Path = new List<Node>();
             _rrt = new Rrt.Rrt(controller.Radius/10, controller.FieldWidth/10, controller.FieldHeight/10);
             new Thread(MoveRobot).Start();
         }
@@ -44,7 +45,7 @@ namespace SSL_HUB.Central
             GoalAngle = (float) goalAngle;
             Moving = true;
         }
-
+        // TODO: robot vibrating at angles greater then 180 and path is not smooth
         private void MoveRobot()
         {
             while (true)
@@ -73,6 +74,8 @@ namespace SSL_HUB.Central
                     CalculatePath();
                     var goalX = Path.First().X;
                     var goalY = Path.First().Y;
+                    var angle1 = (CurrentAngle < 0) ? (float) (CurrentAngle + 2*Math.PI) : CurrentAngle;
+                    var angle2 = (GoalAngle < 0) ? (float) (GoalAngle + 2*Math.PI) : GoalAngle;
 
                     var theeta = Math.Atan2(goalY - CurrentY, goalX - CurrentX) - CurrentAngle;
                     var distance = Math.Sqrt(Math.Pow(CurrentX - goalX, 2) + Math.Pow(CurrentY - goalY, 2));
@@ -83,25 +86,39 @@ namespace SSL_HUB.Central
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
-                        vw = AngularVelocity;
+                        if (Math.Sin(angle2 - angle1) > 0)
+                        {
+                            vw = AngularVelocity;
+                        }
+                        else
+                        {
+                            vw = -AngularVelocity;
+                        }
                     }
                     else if (distance > 100)
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
-                        vw = 0;
+                        vw = Zero;
                     }
                     else if (Math.Abs(Helper.Rtd(GoalAngle - CurrentAngle)) > 5)
                     {
-                        vx = 0;
-                        vy = 0;
-                        vw = AngularVelocity;
+                        vx = Zero;
+                        vy = Zero;
+                        if (Math.Sin(angle2 - angle1) > 0)
+                        {
+                            vw = AngularVelocity;
+                        }
+                        else
+                        {
+                            vw = -AngularVelocity;
+                        }
                     }
                     else
                     {
-                        vx = 0;
-                        vy = 0;
-                        vw = 0;
+                        vx = Zero;
+                        vy = Zero;
+                        vw = Zero;
                         if (Path.Count == 1)
                         {
                             Moving = false;
@@ -139,8 +156,10 @@ namespace SSL_HUB.Central
             var data = Helper.GetData();
             var obstacles = new List<Node>();
 
-            obstacles.AddRange(data.detection.robots_yellow.Select(robot => new Node((int) robot.x/10, (int) robot.y/10)));
-            obstacles.AddRange(data.detection.robots_blue.Select(robot => new Node((int) robot.x/10, (int) robot.y/10)));
+            obstacles.AddRange(
+                data.detection.robots_yellow.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+            obstacles.AddRange(
+                data.detection.robots_blue.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
 
             if (IsYellow)
             {
@@ -151,15 +170,35 @@ namespace SSL_HUB.Central
                 obstacles.RemoveAt(Id + 6);
             }
 
-            _rrt.SetConditions(new Node((int) CurrentX/10, (int) CurrentY/10), new Node((int) GoalX/10, (int) GoalY/10),
-                obstacles);
+            _rrt.SetConditions(new Node(ScaleDownX(CurrentX), ScaleDownY(CurrentY)),
+                new Node(ScaleDownX(GoalX), ScaleDownY(GoalY)), obstacles);
 
             var scaledPath = _rrt.GetPath();
             Path.Clear();
             foreach (var node in scaledPath)
             {
-                Path.Add(new Node(node.X*10, node.Y*10));
+                Path.Add(new Node(ScaleUpX(node.X), ScaleUpY(node.Y)));
             }
+        }
+
+        private static int ScaleDownX(float x)
+        {
+            return (int) ((x + 3000)/10);
+        }
+
+        private static int ScaleDownY(float y)
+        {
+            return (int) ((y + 2000)/10);
+        }
+
+        private static int ScaleUpX(int x)
+        {
+            return x*10 - 3000;
+        }
+
+        private static int ScaleUpY(int y)
+        {
+            return y*10 - 2000;
         }
 
         public void Stop()

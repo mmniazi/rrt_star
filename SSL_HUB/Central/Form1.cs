@@ -9,11 +9,6 @@ namespace SSL_HUB.Central
     {
         private const float Velocity = 1;
         private const float AngularVelocity = (float) (Math.PI/2);
-        public List<Robot> BlueRobots { get; private set; }
-        public List<Robot> YellowRobots { get; private set; }
-        public int Radius { get; private set; }
-        public int FieldWidth { get; private set; }
-        public int FieldHeight { get; private set; }
 
         public Form1()
         {
@@ -21,7 +16,7 @@ namespace SSL_HUB.Central
 
             BlueRobots = new List<Robot>(6);
             YellowRobots = new List<Robot>(6);
-            Radius = 1;
+            Radius = 200;
             FieldWidth = 6000;
             FieldHeight = 4000;
 
@@ -31,6 +26,12 @@ namespace SSL_HUB.Central
                 BlueRobots.Add(new Robot(false, i, Velocity, AngularVelocity, this));
             }
         }
+
+        public List<Robot> BlueRobots { get; private set; }
+        public List<Robot> YellowRobots { get; private set; }
+        public int Radius { get; private set; }
+        public int FieldWidth { get; private set; }
+        public int FieldHeight { get; private set; }
 
         private void Move_Click(object sender, EventArgs e)
         {
