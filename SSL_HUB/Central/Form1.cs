@@ -32,6 +32,8 @@ namespace SSL_HUB.Central
         public int Radius { get; private set; }
         public int FieldWidth { get; private set; }
         public int FieldHeight { get; private set; }
+        public Keeper YellowKeeper { get; private set; }
+        public Keeper BlueKeeper { get; private set; }
 
         private void Move_Click(object sender, EventArgs e)
         {
@@ -89,6 +91,16 @@ namespace SSL_HUB.Central
             {
                 BlueRobots.ElementAt(id).Stop();
             }
+        }
+
+        private void DefendYellow_Click(object sender, EventArgs e)
+        {
+            YellowKeeper = new Keeper(true, Velocity, AngularVelocity);
+        }
+
+        private void DefendBlue_Click(object sender, EventArgs e)
+        {
+            BlueKeeper = new Keeper(false, Velocity, AngularVelocity);
         }
     }
 }

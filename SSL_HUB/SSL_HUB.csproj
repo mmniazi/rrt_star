@@ -54,6 +54,7 @@
     <Compile Include="Central\Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="Central\Keeper.cs" />
     <Compile Include="Libs\grSim_Commands.cs" />
     <Compile Include="Libs\grSim_packet.cs" />
     <Compile Include="Libs\grSim_Replacement.cs" />

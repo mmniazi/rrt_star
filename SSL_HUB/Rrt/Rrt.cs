@@ -96,7 +96,7 @@ namespace SSL_HUB.Rrt
 
         public void CalcPath()
         {
-            bool goalReached = false;
+            var goalReached = false;
             for (var i = 0; i < _iterations || !goalReached; i++)
             {
                 var randomNode = i%_tryGoalFactor == 0
