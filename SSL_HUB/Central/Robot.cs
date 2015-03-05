@@ -45,7 +45,7 @@ namespace SSL_HUB.Central
             GoalAngle = (float) goalAngle;
             Moving = true;
         }
-        // TODO: path is not smooth
+
         private void MoveRobot()
         {
             while (true)
@@ -82,10 +82,23 @@ namespace SSL_HUB.Central
                     double vx, vy, vw;
                     double[] motorAlpha = {Helper.Dtr(45), Helper.Dtr(120), Helper.Dtr(-120), Helper.Dtr(-45)};
 
-                    if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
+                    if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5 && Path.Count == 1)
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
+                        if (Math.Sin(angle2 - angle1) > 0)
+                        {
+                            vw = AngularVelocity;
+                        }
+                        else
+                        {
+                            vw = -AngularVelocity;
+                        }
+                    }
+                    else if (Math.Abs(Helper.Rtd(angle2 - angle1)) > 5 && Path.Count == 1)
+                    {
+                        vx = Zero;
+                        vy = Zero;
                         if (Math.Sin(angle2 - angle1) > 0)
                         {
                             vw = AngularVelocity;
@@ -100,19 +113,6 @@ namespace SSL_HUB.Central
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
                         vw = Zero;
-                    }
-                    else if (Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
-                    {
-                        vx = Zero;
-                        vy = Zero;
-                        if (Math.Sin(angle2 - angle1) > 0)
-                        {
-                            vw = AngularVelocity;
-                        }
-                        else
-                        {
-                            vw = -AngularVelocity;
-                        }
                     }
                     else
                     {
@@ -174,10 +174,13 @@ namespace SSL_HUB.Central
                 new Node(ScaleDownX(GoalX), ScaleDownY(GoalY)), obstacles);
 
             var scaledPath = _rrt.GetPath();
-            Path.Clear();
-            foreach (var node in scaledPath)
+            if (!ReferenceEquals(null, scaledPath))
             {
-                Path.Add(new Node(ScaleUpX(node.X), ScaleUpY(node.Y)));
+                Path.Clear();
+                foreach (var node in scaledPath)
+                {
+                    Path.Add(new Node(ScaleUpX(node.X), ScaleUpY(node.Y)));
+                }
             }
         }
 

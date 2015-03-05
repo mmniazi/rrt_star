@@ -75,11 +75,12 @@ namespace SSL_HUB.Rrt
 
         public List<Node> GetPath()
         {
-            if (_currentPath.Count == 0 || _currentPath.Last() != _goalNode || !IsValidPath())
+            if (_currentPath.Count == 0 || _currentPath.Last().X != _goalNode.X || _currentPath.Last().Y != _goalNode.Y || !IsValidPath())
             {
                 CalcPath();
+                return _currentPath;
             }
-            return _currentPath;
+            return null;
         }
 
         private bool IsValidPath()
