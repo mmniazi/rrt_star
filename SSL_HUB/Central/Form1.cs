@@ -14,13 +14,13 @@ namespace SSL_HUB.Central
         {
             InitializeComponent();
 
-            BlueRobots = new List<Robot>(6);
-            YellowRobots = new List<Robot>(6);
+            BlueRobots = new List<Robot>(5);
+            YellowRobots = new List<Robot>(5);
             Radius = 200;
             FieldWidth = 6000;
             FieldHeight = 4000;
 
-            for (var i = 0; i < 6; i++)
+            for (var i = 0; i < 5; i++)
             {
                 YellowRobots.Add(new Robot(true, i, Velocity, AngularVelocity, this));
                 BlueRobots.Add(new Robot(false, i, Velocity, AngularVelocity, this));
