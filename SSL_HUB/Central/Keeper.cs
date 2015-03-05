@@ -27,7 +27,7 @@ namespace SSL_HUB.Central
             while (true)
             {
                 Thread.Sleep(10);
-                float currentX, currentY, currentAngle, goalY, goalAngle;
+                float currentX, currentY, currentAngle, goalX, goalY, goalAngle;
                 var data = Helper.GetData();
                 var ballX1 = data.detection.balls[0].x;
                 var ballY1 = data.detection.balls[0].y;
@@ -45,30 +45,36 @@ namespace SSL_HUB.Central
                 }
 
                 var ballAngle = Math.Atan2(ballY1 - ballY, ballX1 - ballX);
-                float goalX = (_isYellow) ? 2800 : -2800;
                 var angle = Helper.Rtd((ballAngle < 0) ? (float) (ballAngle + 2*Math.PI) : ballAngle);
                 if (_isYellow && (angle >= 90 && angle <= 270))
                 {
+                    goalX = 0;
                     goalY = 0;
                     goalAngle = (float) Math.PI;
                 }
                 else if (!_isYellow && !(angle >= 90 && angle <= 270))
                 {
+                    goalX = 0;
                     goalY = 0;
                     goalAngle = 0;
                 }
                 else
                 {
-                    if (_isYellow)
-                    {
-                        goalAngle = (float) (ballAngle + Math.PI);
-                        goalY = (float) (ballY1 - (ballX1 - goalX)/Math.Tan(goalAngle));
-                    }
-                    else
-                    {
-                        goalY = 0;
-                        goalAngle = 0;
-                    }
+                    goalAngle = (float) (ballAngle + Math.PI);
+
+                    // Parameters for eq of ball line
+                    var a1 = ballY1 - ballY;
+                    var b1 = ballX - ballX1;
+                    var c1 = a1*ballX + b1*ballY;
+
+                    // Parameters for eq of goal line
+                    const int a2 = 700 - (-700);
+                    const int b2 = 2800 - 2800;
+                    const int c2 = a2*2800 + b2*-700;
+
+                    var det = a1*b2 - a2*b1;
+                    goalX = (b2*c1 - b1*c2)/det;
+                    goalY = (a1*c2 - a2*c1)/det;
                 }
 
                 if (goalY < -700)
