@@ -74,6 +74,7 @@ namespace SSL_HUB.Central
                     CalculatePath();
                     var goalX = Path.First().X;
                     var goalY = Path.First().Y;
+
                     var angle1 = (CurrentAngle < 0) ? (float) (CurrentAngle + 2*Math.PI) : CurrentAngle;
                     var angle2 = (GoalAngle < 0) ? (float) (GoalAngle + 2*Math.PI) : GoalAngle;
 

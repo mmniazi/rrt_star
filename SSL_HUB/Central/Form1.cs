@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace SSL_HUB.Central
@@ -52,32 +53,42 @@ namespace SSL_HUB.Central
             }
         }
 
+        // TODO: improving ball tracking
         private void TrackBall_Click(object sender, EventArgs e)
         {
-            if (IsYellow.Checked)
+            new Thread(() =>
             {
-                var id = Convert.ToInt32(Id.Text);
-                var data = Helper.GetData();
-                var currentX = data.detection.robots_yellow[id].x;
-                var currentY = data.detection.robots_yellow[id].y;
-                var goalX = data.detection.balls[0].x;
-                var goalY = data.detection.balls[0].y;
-                var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
-
-                YellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
-            }
-            else
-            {
-                var id = Convert.ToInt32(Id.Text);
-                var data = Helper.GetData();
-                var currentX = data.detection.robots_blue[id].x;
-                var currentY = data.detection.robots_blue[id].y;
-                var goalX = data.detection.balls[0].x;
-                var goalY = data.detection.balls[0].y;
-                var goalAngle = (float) (Math.Atan2(goalY - currentY, goalX - currentX));
-
-                BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
-            }
+                float oldGoalX = 99999;
+                float oldGoalY = 99999;
+                while (true)
+                {
+                    Thread.Sleep(10);
+                    var data = Helper.GetData();
+                    var goalX = data.detection.balls[0].x;
+                    var goalY = data.detection.balls[0].y;
+                    var distance = Math.Sqrt(Math.Pow(goalX - oldGoalX, 2) + Math.Pow(goalY - oldGoalY, 2));
+                    if (IsYellow.Checked && distance > 10)
+                    {
+                        var id = Convert.ToInt32(Id.Text);
+                        var currentX = data.detection.robots_yellow[id].x;
+                        var currentY = data.detection.robots_yellow[id].y;
+                        var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
+                        YellowRobots.ElementAt(id).SetGoal(oldGoalX, oldGoalY, goalAngle);
+                        oldGoalX = goalX;
+                        oldGoalY = goalY;
+                    }
+                    else if (distance > 10)
+                    {
+                        var id = Convert.ToInt32(Id.Text);
+                        var currentX = data.detection.robots_blue[id].x;
+                        var currentY = data.detection.robots_blue[id].y;
+                        var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
+                        BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                        oldGoalX = goalX;
+                        oldGoalY = goalY;
+                    }
+                }
+            }).Start();
         }
 
         private void Stop_Click(object sender, EventArgs e)

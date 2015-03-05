@@ -51,16 +51,20 @@ namespace SSL_HUB.Central
                 {
                     goalY = 0;
                     goalAngle = (float) Math.PI;
+                    ballX = ballX1;
+                    ballY = ballY1;
                 }
                 else if (!_isYellow && !(angle >= 90 && angle <= 270))
                 {
                     goalY = 0;
                     goalAngle = 0;
+                    ballX = ballX1;
+                    ballY = ballY1;
                 }
-                else if (Math.Sqrt(Math.Pow(ballX1 - ballX, 2) + Math.Pow(ballY1 - ballY, 2)) < 100)
+                else if (Math.Sqrt(Math.Pow(ballX1 - ballX, 2) + Math.Pow(ballY1 - ballY, 2)) < 5)
                 {
-                    goalY = ballY1;
-                    goalAngle = (float) ((_isYellow) ? Math.PI : 0);
+                    goalY = currentY;
+                    goalAngle = (float) (Math.Atan2(ballY1 - currentY, ballX1 - currentX));
                 }
                 else
                 {
@@ -82,7 +86,7 @@ namespace SSL_HUB.Central
                     ballX = ballX1;
                     ballY = ballY1;
                 }
-                    goalX = (_isYellow) ? 2800 : -2800;
+                goalX = (_isYellow) ? 2800 : -2800;
 
                 if (goalY < -700)
                 {
