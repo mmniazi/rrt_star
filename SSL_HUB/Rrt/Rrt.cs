@@ -19,7 +19,7 @@ namespace SSL_HUB.Rrt
         private List<Node> _nearestNodes;
         private int _neighbourRadius;
         private Tree _tree;
-
+        // TODO: breaking on moving out of boundary
         public Rrt(int radius, int fieldWidth, int fieldHeight)
         {
             _fieldWidth = fieldWidth;

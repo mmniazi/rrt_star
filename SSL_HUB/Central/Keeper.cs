@@ -27,10 +27,11 @@ namespace SSL_HUB.Central
             while (true)
             {
                 Thread.Sleep(10);
-                float currentX, currentY, currentAngle, goalX, goalY, goalAngle;
                 var data = Helper.GetData();
                 var ballX1 = data.detection.balls[0].x;
                 var ballY1 = data.detection.balls[0].y;
+
+                float currentX, currentY, currentAngle, goalX, goalY, goalAngle;
                 if (_isYellow)
                 {
                     currentX = data.detection.robots_yellow[5].x;
@@ -48,15 +49,18 @@ namespace SSL_HUB.Central
                 var angle = Helper.Rtd((ballAngle < 0) ? (float) (ballAngle + 2*Math.PI) : ballAngle);
                 if (_isYellow && (angle >= 90 && angle <= 270))
                 {
-                    goalX = 0;
                     goalY = 0;
                     goalAngle = (float) Math.PI;
                 }
                 else if (!_isYellow && !(angle >= 90 && angle <= 270))
                 {
-                    goalX = 0;
                     goalY = 0;
                     goalAngle = 0;
+                }
+                else if (Math.Sqrt(Math.Pow(ballX1 - ballX, 2) + Math.Pow(ballY1 - ballY, 2)) < 100)
+                {
+                    goalY = ballY1;
+                    goalAngle = (float) ((_isYellow) ? Math.PI : 0);
                 }
                 else
                 {
@@ -70,12 +74,15 @@ namespace SSL_HUB.Central
                     // Parameters for eq of goal line
                     const int a2 = 700 - (-700);
                     const int b2 = 2800 - 2800;
-                    const int c2 = a2*2800 + b2*-700;
+                    var c2 = a2*((_isYellow) ? 2800 : -2800) + b2*-700;
 
                     var det = a1*b2 - a2*b1;
-                    goalX = (b2*c1 - b1*c2)/det;
                     goalY = (a1*c2 - a2*c1)/det;
+
+                    ballX = ballX1;
+                    ballY = ballY1;
                 }
+                    goalX = (_isYellow) ? 2800 : -2800;
 
                 if (goalY < -700)
                 {
@@ -151,9 +158,6 @@ namespace SSL_HUB.Central
                          (((RobotRadius*vw) - (vx*Math.Sin(motorAlpha[3])) + (vy*Math.Cos(motorAlpha[3])))));
 
                 Helper.SendData(_isYellow, 5, v1, v2, v3, v4);
-
-//                ballX = ballX1;
-//                ballY = ballY1;
             }
         }
     }
