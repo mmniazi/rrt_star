@@ -83,7 +83,7 @@ namespace SSL_HUB.Central
                     double vx, vy, vw;
                     double[] motorAlpha = {Helper.Dtr(45), Helper.Dtr(120), Helper.Dtr(-120), Helper.Dtr(-45)};
 
-                    if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5 && Path.Count == 1)
+                    if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);

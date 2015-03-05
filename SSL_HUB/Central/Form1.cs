@@ -60,32 +60,71 @@ namespace SSL_HUB.Central
             {
                 float oldGoalX = 99999;
                 float oldGoalY = 99999;
+                float oldGoalAngle = 0;
                 while (true)
                 {
                     Thread.Sleep(10);
+                    var id = Convert.ToInt32(Id.Text);
                     var data = Helper.GetData();
+                    var isYellow = IsYellow.Checked;
+
+                    var currentX = (isYellow)
+                        ? data.detection.robots_yellow[id].x
+                        : data.detection.robots_blue[id].x;
+                    var currentY = (isYellow)
+                        ? data.detection.robots_yellow[id].y
+                        : data.detection.robots_blue[id].y;
+                    var currentAngle = (isYellow)
+                        ? data.detection.robots_yellow[id].orientation
+                        : data.detection.robots_blue[id].orientation;
                     var goalX = data.detection.balls[0].x;
                     var goalY = data.detection.balls[0].y;
+                    var goalAngle = (float) Math.Atan2(goalY - currentY, goalX - currentX);
+
                     var distance = Math.Sqrt(Math.Pow(goalX - oldGoalX, 2) + Math.Pow(goalY - oldGoalY, 2));
-                    if (IsYellow.Checked && distance > 10)
+                    var dTheeta = Math.Abs(Helper.Rtd(goalAngle - currentAngle));
+
+                    if (isYellow)
                     {
-                        var id = Convert.ToInt32(Id.Text);
-                        var currentX = data.detection.robots_yellow[id].x;
-                        var currentY = data.detection.robots_yellow[id].y;
-                        var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
-                        YellowRobots.ElementAt(id).SetGoal(oldGoalX, oldGoalY, goalAngle);
-                        oldGoalX = goalX;
-                        oldGoalY = goalY;
+                        if (distance > 10 && dTheeta > 5)
+                        {
+                            YellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                            oldGoalX = goalX;
+                            oldGoalY = goalY;
+                            oldGoalAngle = goalAngle;
+                        }
+                        else if (distance > 10)
+                        {
+                            YellowRobots.ElementAt(id).SetGoal(goalX, goalY, oldGoalAngle);
+                            oldGoalX = goalX;
+                            oldGoalY = goalY;
+                        }
+                        else if (dTheeta > 5)
+                        {
+                            YellowRobots.ElementAt(id).SetGoal(oldGoalX, oldGoalY, goalAngle);
+                            oldGoalAngle = goalAngle;
+                        }
                     }
-                    else if (distance > 10)
+                    else
                     {
-                        var id = Convert.ToInt32(Id.Text);
-                        var currentX = data.detection.robots_blue[id].x;
-                        var currentY = data.detection.robots_blue[id].y;
-                        var goalAngle = Math.Atan2(goalY - currentY, goalX - currentX);
-                        BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
-                        oldGoalX = goalX;
-                        oldGoalY = goalY;
+                        if (distance > 10 && dTheeta > 5)
+                        {
+                            BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                            oldGoalX = goalX;
+                            oldGoalY = goalY;
+                            oldGoalAngle = goalAngle;
+                        }
+                        else if (distance > 10)
+                        {
+                            BlueRobots.ElementAt(id).SetGoal(goalX, goalY, oldGoalAngle);
+                            oldGoalX = goalX;
+                            oldGoalY = goalY;
+                        }
+                        else if (dTheeta > 5)
+                        {
+                            BlueRobots.ElementAt(id).SetGoal(oldGoalX, oldGoalY, goalAngle);
+                            oldGoalAngle = goalAngle;
+                        }
                     }
                 }
             }).Start();
