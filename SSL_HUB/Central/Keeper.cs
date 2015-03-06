@@ -54,7 +54,7 @@ namespace SSL_HUB.Central
                     ballX = ballX1;
                     ballY = ballY1;
                 }
-                else if (!_isYellow && !(angle >= 90 && angle <= 270))
+                else if (!_isYellow && angle <= 90 && angle >= 270)
                 {
                     goalY = 0;
                     goalAngle = 0;
