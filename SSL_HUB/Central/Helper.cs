@@ -13,6 +13,7 @@ namespace SSL_HUB.Central
     {
         private static readonly UdpClient Client;
         private static Byte[] _data;
+        public static bool Spinner { get; set; }
 
         static Helper()
         {
@@ -39,7 +40,7 @@ namespace SSL_HUB.Central
             return Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(_data));
         }
 
-        public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4)
+        public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4, float kickSpeedX,float kickSpeedZ)
         {
             var pkt = new grSim_Packet {commands = new grSim_Commands()};
             var robotCmd = new grSim_Robot_Command();
@@ -50,9 +51,9 @@ namespace SSL_HUB.Central
             robotCmd.velnormal = 0;
             robotCmd.veltangent = 0;
             robotCmd.velangular = 0;
-            robotCmd.kickspeedx = 0;
-            robotCmd.kickspeedz = 0;
-            robotCmd.spinner = true;
+            robotCmd.kickspeedx = kickSpeedX;
+            robotCmd.kickspeedz = kickSpeedZ;
+            robotCmd.spinner = Spinner;
             robotCmd.wheel1 = w1;
             robotCmd.wheel2 = w2;
             robotCmd.wheel3 = w3;

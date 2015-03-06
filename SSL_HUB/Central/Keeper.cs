@@ -8,17 +8,22 @@ namespace SSL_HUB.Central
         private const double RobotRadius = 0.0875;
         private const double WheelRadius = 0.0289;
         private const float Zero = (float) 0.000000000001;
-        private readonly float _angularVelocity;
-        private readonly bool _isYellow;
-        private readonly float _velocity;
 
         public Keeper(bool isYellow, float velocity, float angularVelocity)
         {
-            _isYellow = isYellow;
-            _velocity = velocity;
-            _angularVelocity = angularVelocity;
+            IsYellow = isYellow;
+            Velocity = velocity;
+            AngularVelocity = angularVelocity;
             new Thread(Trace).Start();
+            KickSpeedX = 0;
+            KickSpeedZ = 0;
         }
+
+        public float AngularVelocity { get; private set; }
+        public bool IsYellow { get; private set; }
+        public float Velocity { get; private set; }
+        public float KickSpeedX { get; set; }
+        public float KickSpeedZ { get; set; }
 
         private void Trace()
         {
@@ -32,7 +37,7 @@ namespace SSL_HUB.Central
                 var ballY1 = data.detection.balls[0].y;
 
                 float currentX, currentY, currentAngle, goalX, goalY, goalAngle;
-                if (_isYellow)
+                if (IsYellow)
                 {
                     currentX = data.detection.robots_yellow[5].x;
                     currentY = data.detection.robots_yellow[5].y;
@@ -47,14 +52,14 @@ namespace SSL_HUB.Central
 
                 var ballAngle = Math.Atan2(ballY1 - ballY, ballX1 - ballX);
                 var angle = Helper.Rtd((ballAngle < 0) ? (float) (ballAngle + 2*Math.PI) : ballAngle);
-                if (_isYellow && (angle >= 90 && angle <= 270))
+                if (IsYellow && (angle >= 90 && angle <= 270))
                 {
                     goalY = 0;
                     goalAngle = (float) Math.PI;
                     ballX = ballX1;
                     ballY = ballY1;
                 }
-                else if (!_isYellow && angle <= 90 && angle >= 270)
+                else if (!IsYellow && angle <= 90 && angle >= 270)
                 {
                     goalY = 0;
                     goalAngle = 0;
@@ -78,7 +83,7 @@ namespace SSL_HUB.Central
                     // Parameters for eq of goal line
                     const int a2 = 700 - (-700);
                     const int b2 = 2800 - 2800;
-                    var c2 = a2*((_isYellow) ? 2800 : -2800) + b2*-700;
+                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-700;
 
                     var det = a1*b2 - a2*b1;
                     goalY = (a1*c2 - a2*c1)/det;
@@ -86,7 +91,7 @@ namespace SSL_HUB.Central
                     ballX = ballX1;
                     ballY = ballY1;
                 }
-                goalX = (_isYellow) ? 2800 : -2800;
+                goalX = (IsYellow) ? 2800 : -2800;
 
                 if (goalY < -700)
                 {
@@ -107,21 +112,21 @@ namespace SSL_HUB.Central
 
                 if (distance > 100 && Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
                 {
-                    vx = _velocity*Math.Cos(theeta);
-                    vy = _velocity*Math.Sin(theeta);
+                    vx = Velocity*Math.Cos(theeta);
+                    vy = Velocity*Math.Sin(theeta);
                     if (Math.Sin(angle2 - angle1) > 0)
                     {
-                        vw = _angularVelocity;
+                        vw = AngularVelocity;
                     }
                     else
                     {
-                        vw = -_angularVelocity;
+                        vw = -AngularVelocity;
                     }
                 }
                 else if (distance > 100)
                 {
-                    vx = _velocity*Math.Cos(theeta);
-                    vy = _velocity*Math.Sin(theeta);
+                    vx = Velocity*Math.Cos(theeta);
+                    vy = Velocity*Math.Sin(theeta);
                     vw = Zero;
                 }
                 else if (Math.Abs(Helper.Rtd(angle2 - angle1)) > 5)
@@ -130,11 +135,11 @@ namespace SSL_HUB.Central
                     vy = Zero;
                     if (Math.Sin(angle2 - angle1) > 0)
                     {
-                        vw = _angularVelocity;
+                        vw = AngularVelocity;
                     }
                     else
                     {
-                        vw = -_angularVelocity;
+                        vw = -AngularVelocity;
                     }
                 }
                 else
@@ -161,7 +166,9 @@ namespace SSL_HUB.Central
                         ((1.0/WheelRadius)*
                          (((RobotRadius*vw) - (vx*Math.Sin(motorAlpha[3])) + (vy*Math.Cos(motorAlpha[3])))));
 
-                Helper.SendData(_isYellow, 5, v1, v2, v3, v4);
+                Helper.SendData(IsYellow, 5, v1, v2, v3, v4, KickSpeedX, KickSpeedZ);
+                KickSpeedX = 0;
+                KickSpeedZ = 0;
             }
         }
     }

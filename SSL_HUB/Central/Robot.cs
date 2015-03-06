@@ -37,6 +37,8 @@ namespace SSL_HUB.Central
         public float CurrentAngle { get; private set; }
         public bool Moving { get; private set; }
         public List<Node> Path { get; private set; }
+        public float KickSpeedX { get; set; }
+        public float KickSpeedZ { get; set; }
 
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
@@ -44,6 +46,8 @@ namespace SSL_HUB.Central
             GoalY = (float) goalY;
             GoalAngle = (float) goalAngle;
             Moving = true;
+            KickSpeedX = 0;
+            KickSpeedZ = 0;
         }
 
         private void MoveRobot()
@@ -53,7 +57,9 @@ namespace SSL_HUB.Central
                 if (!Moving)
                 {
                     Thread.Sleep(10);
-                    Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero);
+                    Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero,KickSpeedX,KickSpeedZ);
+                    KickSpeedX = 0;
+                    KickSpeedZ = 0;
                 }
                 else
                 {
@@ -147,7 +153,9 @@ namespace SSL_HUB.Central
                             ((1.0/WheelRadius)*
                              (((RobotRadius*vw) - (vx*Math.Sin(motorAlpha[3])) + (vy*Math.Cos(motorAlpha[3])))));
 
-                    Helper.SendData(IsYellow, Id, v1, v2, v3, v4);
+                    Helper.SendData(IsYellow, Id, v1, v2, v3, v4,KickSpeedX,KickSpeedZ);
+                    KickSpeedX = 0;
+                    KickSpeedZ = 0;
                 }
             }
         }

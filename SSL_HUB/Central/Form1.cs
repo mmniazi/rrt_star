@@ -257,5 +257,25 @@ namespace SSL_HUB.Central
                 textBox3.AppendText("\n" + ex.Message + "\n");
             }
         }
+
+        private void Kick_Click(object sender, EventArgs e)
+        {
+            var id = Convert.ToInt32(Id.Text);
+            if (IsYellow.Checked)
+            {
+                YellowRobots.ElementAt(id).KickSpeedX = (float) Convert.ToDouble(KickSpeedX.Text);
+                YellowRobots.ElementAt(id).KickSpeedZ = (float) Convert.ToDouble(KickSpeedZ.Text);
+            }
+            else
+            {
+                BlueRobots.ElementAt(id).KickSpeedX = (float) Convert.ToDouble(KickSpeedX.Text);
+                BlueRobots.ElementAt(id).KickSpeedZ = (float) Convert.ToDouble(KickSpeedZ.Text);
+            }
+        }
+
+        private void Spinner_CheckedChanged(object sender, EventArgs e)
+        {
+            Helper.Spinner = Spinner.Checked;
+        }
     }
 }
