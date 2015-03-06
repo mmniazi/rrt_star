@@ -53,7 +53,6 @@ namespace SSL_HUB.Central
             }
         }
 
-        // TODO: improving ball tracking
         private void TrackBall_Click(object sender, EventArgs e)
         {
             new Thread(() =>

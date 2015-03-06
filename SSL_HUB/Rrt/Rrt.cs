@@ -20,6 +20,7 @@ namespace SSL_HUB.Rrt
         private int _neighbourRadius;
         private Tree _tree;
         // TODO: breaking on moving out of boundary
+        // TODO: Need further optimization to make it 90 ms.
         public Rrt(int radius, int fieldWidth, int fieldHeight)
         {
             _fieldWidth = fieldWidth;
