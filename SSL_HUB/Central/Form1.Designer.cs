@@ -44,6 +44,13 @@
             this.DefendBlue = new System.Windows.Forms.Button();
             this.MoveToBall = new System.Windows.Forms.Button();
             this.Kick = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.OpenSerial = new System.Windows.Forms.Button();
+            this.CloseSerial = new System.Windows.Forms.Button();
+            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.label6 = new System.Windows.Forms.Label();
+            this.textBox3 = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // Stop
@@ -156,9 +163,9 @@
             // 
             // DefendYellow
             // 
-            this.DefendYellow.Location = new System.Drawing.Point(44, 153);
+            this.DefendYellow.Location = new System.Drawing.Point(279, 151);
             this.DefendYellow.Name = "DefendYellow";
-            this.DefendYellow.Size = new System.Drawing.Size(174, 23);
+            this.DefendYellow.Size = new System.Drawing.Size(75, 39);
             this.DefendYellow.TabIndex = 21;
             this.DefendYellow.Text = "Defend Goal Yellow";
             this.DefendYellow.UseVisualStyleBackColor = true;
@@ -166,9 +173,9 @@
             // 
             // DefendBlue
             // 
-            this.DefendBlue.Location = new System.Drawing.Point(44, 182);
+            this.DefendBlue.Location = new System.Drawing.Point(279, 196);
             this.DefendBlue.Name = "DefendBlue";
-            this.DefendBlue.Size = new System.Drawing.Size(174, 23);
+            this.DefendBlue.Size = new System.Drawing.Size(75, 41);
             this.DefendBlue.TabIndex = 22;
             this.DefendBlue.Text = "Defend Goal Blue";
             this.DefendBlue.UseVisualStyleBackColor = true;
@@ -193,11 +200,80 @@
             this.Kick.Text = "Kick";
             this.Kick.UseVisualStyleBackColor = true;
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(118, 137);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(100, 20);
+            this.textBox1.TabIndex = 25;
+            this.textBox1.Text = "COM10";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(38, 140);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(37, 13);
+            this.label5.TabIndex = 26;
+            this.label5.Text = "PORT";
+            // 
+            // OpenSerial
+            // 
+            this.OpenSerial.Location = new System.Drawing.Point(28, 227);
+            this.OpenSerial.Name = "OpenSerial";
+            this.OpenSerial.Size = new System.Drawing.Size(112, 23);
+            this.OpenSerial.TabIndex = 27;
+            this.OpenSerial.Text = "Open Serial";
+            this.OpenSerial.UseVisualStyleBackColor = true;
+            this.OpenSerial.Click += new System.EventHandler(this.OpenSerial_Click);
+            // 
+            // CloseSerial
+            // 
+            this.CloseSerial.Location = new System.Drawing.Point(146, 227);
+            this.CloseSerial.Name = "CloseSerial";
+            this.CloseSerial.Size = new System.Drawing.Size(109, 23);
+            this.CloseSerial.TabIndex = 28;
+            this.CloseSerial.Text = "Close Serial";
+            this.CloseSerial.UseVisualStyleBackColor = true;
+            this.CloseSerial.Click += new System.EventHandler(this.CloseSerial_Click);
+            // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(118, 163);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(100, 20);
+            this.textBox2.TabIndex = 29;
+            this.textBox2.Text = "9600";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(38, 167);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(58, 13);
+            this.label6.TabIndex = 30;
+            this.label6.Text = "Baud Rate";
+            // 
+            // textBox3
+            // 
+            this.textBox3.Location = new System.Drawing.Point(360, 8);
+            this.textBox3.Multiline = true;
+            this.textBox3.Name = "textBox3";
+            this.textBox3.Size = new System.Drawing.Size(219, 242);
+            this.textBox3.TabIndex = 31;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(384, 262);
+            this.ClientSize = new System.Drawing.Size(591, 262);
+            this.Controls.Add(this.textBox3);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.textBox2);
+            this.Controls.Add(this.CloseSerial);
+            this.Controls.Add(this.OpenSerial);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.Kick);
             this.Controls.Add(this.MoveToBall);
             this.Controls.Add(this.DefendBlue);
@@ -239,6 +315,13 @@
         private System.Windows.Forms.Button DefendBlue;
         private System.Windows.Forms.Button MoveToBall;
         private System.Windows.Forms.Button Kick;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button OpenSerial;
+        private System.Windows.Forms.Button CloseSerial;
+        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox textBox3;
 
     }
 }

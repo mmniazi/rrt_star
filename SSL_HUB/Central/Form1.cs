@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -10,6 +11,7 @@ namespace SSL_HUB.Central
     {
         private const float Velocity = 1;
         private const float AngularVelocity = (float) (Math.PI/2);
+        private readonly SerialPort _serialWritter;
         private Thread _moveToBall;
         private Thread _trackBall;
 
@@ -17,11 +19,13 @@ namespace SSL_HUB.Central
         {
             InitializeComponent();
 
+
             BlueRobots = new List<Robot>(5);
             YellowRobots = new List<Robot>(5);
             Radius = 200;
             FieldWidth = 6000;
             FieldHeight = 4000;
+            _serialWritter = new SerialPort();
 
             for (var i = 0; i < 5; i++)
             {
@@ -208,6 +212,50 @@ namespace SSL_HUB.Central
                 }
             });
             _moveToBall.Start();
+        }
+
+        private void OpenSerial_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _serialWritter.PortName = textBox1.Text;
+                _serialWritter.BaudRate = int.Parse(textBox2.Text);
+                _serialWritter.Open();
+            }
+            catch (Exception ex)
+            {
+                textBox3.AppendText("\nSerial Port error : " + ex.Message + "\n");
+            }
+        }
+
+        private void CloseSerial_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                _serialWritter.Close();
+            }
+            catch (Exception ex)
+            {
+                textBox3.AppendText(ex.Message + "\n");
+            }
+        }
+
+        private void Send(char motion)
+        {
+            try
+            {
+                if (_serialWritter.IsOpen)
+                    _serialWritter.Write(motion.ToString());
+                else
+                {
+                    _serialWritter.Open();
+                    _serialWritter.Write(motion.ToString());
+                }
+            }
+            catch (Exception ex)
+            {
+                textBox3.AppendText("\n" + ex.Message + "\n");
+            }
         }
     }
 }
