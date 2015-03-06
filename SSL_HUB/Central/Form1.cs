@@ -10,6 +10,8 @@ namespace SSL_HUB.Central
     {
         private const float Velocity = 1;
         private const float AngularVelocity = (float) (Math.PI/2);
+        private Thread _moveToBall;
+        private Thread _trackBall;
 
         public Form1()
         {
@@ -55,7 +57,15 @@ namespace SSL_HUB.Central
 
         private void TrackBall_Click(object sender, EventArgs e)
         {
-            new Thread(() =>
+            if (!ReferenceEquals(null, _moveToBall))
+            {
+                _moveToBall.Abort();
+            }
+            if (!ReferenceEquals(null, _trackBall))
+            {
+                _trackBall.Abort();
+            }
+            _trackBall = new Thread(() =>
             {
                 float oldGoalX = 99999;
                 float oldGoalY = 99999;
@@ -126,7 +136,8 @@ namespace SSL_HUB.Central
                         }
                     }
                 }
-            }).Start();
+            });
+            _trackBall.Start();
         }
 
         private void Stop_Click(object sender, EventArgs e)
@@ -150,6 +161,53 @@ namespace SSL_HUB.Central
         private void DefendBlue_Click(object sender, EventArgs e)
         {
             BlueKeeper = new Keeper(false, Velocity, AngularVelocity);
+        }
+
+        private void MoveToBall_Click(object sender, EventArgs e)
+        {
+            if (!ReferenceEquals(null, _moveToBall))
+            {
+                _moveToBall.Abort();
+            }
+            if (!ReferenceEquals(null, _trackBall))
+            {
+                _trackBall.Abort();
+            }
+            _moveToBall = new Thread(() =>
+            {
+                var id = Convert.ToInt32(Id.Text);
+                var data = Helper.GetData();
+                var isYellow = IsYellow.Checked;
+                var goalX = data.detection.balls[0].x;
+                var goalY = data.detection.balls[0].y;
+                while (true)
+                {
+                    Thread.Sleep(10);
+
+                    var currentX = (isYellow)
+                        ? data.detection.robots_yellow[id].x
+                        : data.detection.robots_blue[id].x;
+                    var currentY = (isYellow)
+                        ? data.detection.robots_yellow[id].y
+                        : data.detection.robots_blue[id].y;
+                    var currentAngle = (isYellow)
+                        ? data.detection.robots_yellow[id].orientation
+                        : data.detection.robots_blue[id].orientation;
+                    var goalAngle = (float) Math.Atan2(goalY - currentY, goalX - currentX);
+
+                    var dTheeta = Math.Abs(Helper.Rtd(goalAngle - currentAngle));
+
+                    if (isYellow && dTheeta > 5)
+                    {
+                        YellowRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                    }
+                    else if (dTheeta > 5)
+                    {
+                        BlueRobots.ElementAt(id).SetGoal(goalX, goalY, goalAngle);
+                    }
+                }
+            });
+            _moveToBall.Start();
         }
     }
 }

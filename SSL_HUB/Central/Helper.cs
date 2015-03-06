@@ -52,7 +52,7 @@ namespace SSL_HUB.Central
             robotCmd.velangular = 0;
             robotCmd.kickspeedx = 0;
             robotCmd.kickspeedz = 0;
-            robotCmd.spinner = false;
+            robotCmd.spinner = true;
             robotCmd.wheel1 = w1;
             robotCmd.wheel2 = w2;
             robotCmd.wheel3 = w3;

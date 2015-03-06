@@ -42,11 +42,13 @@
             this.IsYellow = new System.Windows.Forms.CheckBox();
             this.DefendYellow = new System.Windows.Forms.Button();
             this.DefendBlue = new System.Windows.Forms.Button();
+            this.MoveToBall = new System.Windows.Forms.Button();
+            this.Kick = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Stop
             // 
-            this.Stop.Location = new System.Drawing.Point(279, 61);
+            this.Stop.Location = new System.Drawing.Point(279, 37);
             this.Stop.Name = "Stop";
             this.Stop.Size = new System.Drawing.Size(75, 23);
             this.Stop.TabIndex = 17;
@@ -56,7 +58,7 @@
             // 
             // TrackBall
             // 
-            this.TrackBall.Location = new System.Drawing.Point(279, 35);
+            this.TrackBall.Location = new System.Drawing.Point(279, 64);
             this.TrackBall.Name = "TrackBall";
             this.TrackBall.Size = new System.Drawing.Size(75, 23);
             this.TrackBall.TabIndex = 16;
@@ -172,11 +174,32 @@
             this.DefendBlue.UseVisualStyleBackColor = true;
             this.DefendBlue.Click += new System.EventHandler(this.DefendBlue_Click);
             // 
+            // MoveToBall
+            // 
+            this.MoveToBall.Location = new System.Drawing.Point(279, 93);
+            this.MoveToBall.Name = "MoveToBall";
+            this.MoveToBall.Size = new System.Drawing.Size(75, 23);
+            this.MoveToBall.TabIndex = 23;
+            this.MoveToBall.Text = "Move to Ball";
+            this.MoveToBall.UseVisualStyleBackColor = true;
+            this.MoveToBall.Click += new System.EventHandler(this.MoveToBall_Click);
+            // 
+            // Kick
+            // 
+            this.Kick.Location = new System.Drawing.Point(279, 122);
+            this.Kick.Name = "Kick";
+            this.Kick.Size = new System.Drawing.Size(75, 23);
+            this.Kick.TabIndex = 24;
+            this.Kick.Text = "Kick";
+            this.Kick.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(384, 262);
+            this.Controls.Add(this.Kick);
+            this.Controls.Add(this.MoveToBall);
             this.Controls.Add(this.DefendBlue);
             this.Controls.Add(this.DefendYellow);
             this.Controls.Add(this.IsYellow);
@@ -214,6 +237,8 @@
         private System.Windows.Forms.CheckBox IsYellow;
         private System.Windows.Forms.Button DefendYellow;
         private System.Windows.Forms.Button DefendBlue;
+        private System.Windows.Forms.Button MoveToBall;
+        private System.Windows.Forms.Button Kick;
 
     }
 }
