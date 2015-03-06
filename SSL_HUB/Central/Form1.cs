@@ -9,8 +9,8 @@ namespace SSL_HUB.Central
 {
     public partial class Form1 : Form
     {
-        private const float Velocity = 1;
-        private const float AngularVelocity = (float) (Math.PI/2);
+        private const float Velocity = (float) 0.5;
+        private const float AngularVelocity = (float) (Math.PI/4);
         private readonly SerialPort _serialWritter;
         private Thread _moveToBall;
         private Thread _trackBall;
@@ -26,6 +26,7 @@ namespace SSL_HUB.Central
             FieldWidth = 6000;
             FieldHeight = 4000;
             _serialWritter = new SerialPort();
+            Helper.SetController(this);
 
             for (var i = 0; i < 5; i++)
             {
@@ -240,16 +241,16 @@ namespace SSL_HUB.Central
             }
         }
 
-        private void Send(char motion)
+        public void Send(byte[] data)
         {
             try
             {
                 if (_serialWritter.IsOpen)
-                    _serialWritter.Write(motion.ToString());
+                    _serialWritter.Write(data.ToString());
                 else
                 {
                     _serialWritter.Open();
-                    _serialWritter.Write(motion.ToString());
+                    _serialWritter.Write(data.ToString());
                 }
             }
             catch (Exception ex)
@@ -276,6 +277,11 @@ namespace SSL_HUB.Central
         private void Spinner_CheckedChanged(object sender, EventArgs e)
         {
             Helper.Spinner = Spinner.Checked;
+        }
+
+        public bool SerialChecked()
+        {
+            return Serial.Checked;
         }
     }
 }

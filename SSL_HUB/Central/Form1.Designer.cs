@@ -56,6 +56,7 @@
             this.Spinner = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.KickSpeedZ = new System.Windows.Forms.TextBox();
+            this.Serial = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // Stop
@@ -315,11 +316,22 @@
             this.KickSpeedZ.TabIndex = 36;
             this.KickSpeedZ.Text = "0";
             // 
+            // Serial
+            // 
+            this.Serial.AutoSize = true;
+            this.Serial.Location = new System.Drawing.Point(195, 177);
+            this.Serial.Name = "Serial";
+            this.Serial.Size = new System.Drawing.Size(52, 17);
+            this.Serial.TabIndex = 37;
+            this.Serial.Text = "Serial";
+            this.Serial.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(591, 262);
+            this.Controls.Add(this.Serial);
             this.Controls.Add(this.KickSpeedZ);
             this.Controls.Add(this.label8);
             this.Controls.Add(this.Spinner);
@@ -385,6 +397,7 @@
         private System.Windows.Forms.CheckBox Spinner;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox KickSpeedZ;
+        private System.Windows.Forms.CheckBox Serial;
 
     }
 }

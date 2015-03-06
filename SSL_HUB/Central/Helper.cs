@@ -13,7 +13,7 @@ namespace SSL_HUB.Central
     {
         private static readonly UdpClient Client;
         private static Byte[] _data;
-        public static bool Spinner { get; set; }
+        private static Form1 _controller;
 
         static Helper()
         {
@@ -23,6 +23,14 @@ namespace SSL_HUB.Central
             Client.Client.Bind(new IPEndPoint(IPAddress.Any, 10020));
             Client.JoinMulticastGroup(IPAddress.Parse("224.5.23.2"));
             new Thread(RecieveData).Start();
+            Spinner = true;
+        }
+
+        public static bool Spinner { get; set; }
+
+        public static void SetController(Form1 controller)
+        {
+            _controller = controller;
         }
 
         public static double Dtr(double angle)
@@ -40,7 +48,8 @@ namespace SSL_HUB.Central
             return Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(_data));
         }
 
-        public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4, float kickSpeedX,float kickSpeedZ)
+        public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4, float kickSpeedX,
+            float kickSpeedZ)
         {
             var pkt = new grSim_Packet {commands = new grSim_Commands()};
             var robotCmd = new grSim_Robot_Command();
@@ -64,7 +73,14 @@ namespace SSL_HUB.Central
             var stream = new MemoryStream();
             Serializer.Serialize(stream, pkt);
             var array = stream.ToArray();
-            Client.Send(array, array.Length, new IPEndPoint(IPAddress.Broadcast, 20011));
+            if (_controller.SerialChecked())
+            {
+                _controller.Send(array);
+            }
+            else
+            {
+                Client.Send(array, array.Length, new IPEndPoint(IPAddress.Broadcast, 20011));
+            }
         }
 
         private static void RecieveData()
