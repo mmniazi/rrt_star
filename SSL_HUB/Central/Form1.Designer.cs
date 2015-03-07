@@ -303,6 +303,8 @@
             // Serial
             // 
             this.Serial.AutoSize = true;
+            this.Serial.Checked = true;
+            this.Serial.CheckState = System.Windows.Forms.CheckState.Checked;
             this.Serial.Location = new System.Drawing.Point(195, 177);
             this.Serial.Name = "Serial";
             this.Serial.Size = new System.Drawing.Size(52, 17);

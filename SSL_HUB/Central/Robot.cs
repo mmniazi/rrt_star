@@ -87,9 +87,11 @@ namespace SSL_HUB.Central
                      * SetBallPossesed();
                      */
 
-                    CalculatePath();
-                    var goalX = Path.First().X;
-                    var goalY = Path.First().Y;
+//                    CalculatePath();
+//                    var goalX = Path.First().X;
+//                    var goalY = Path.First().Y;
+                    var goalX = GoalX;
+                    var goalY = GoalY;
 
                     var angle1 = (CurrentAngle < 0) ? (float) (CurrentAngle + 2*Math.PI) : CurrentAngle;
                     var angle2 = (GoalAngle < 0) ? (float) (GoalAngle + 2*Math.PI) : GoalAngle;

@@ -140,7 +140,7 @@ namespace SSL_HUB.Central
             }
             catch (Exception ex)
             {
-                textBox3.AppendText("\nSerial Port error : " + ex.Message + "\n");
+//                textBox3.AppendText("\nSerial Port error : " + ex.Message + "\n");
             }
         }
 
@@ -152,7 +152,7 @@ namespace SSL_HUB.Central
             }
             catch (Exception ex)
             {
-                textBox3.AppendText(ex.Message + "\n");
+//                textBox3.AppendText(ex.Message + "\n");
             }
         }
 
@@ -170,7 +170,7 @@ namespace SSL_HUB.Central
             }
             catch (Exception ex)
             {
-                textBox3.AppendText("\n" + ex.Message + "\n");
+//                textBox3.AppendText("\n" + ex.Message + "\n");
             }
         }
 
@@ -192,7 +192,7 @@ namespace SSL_HUB.Central
         private void Form1_Load(object sender, EventArgs e)
         {
             COMPort.DataSource = SerialPort.GetPortNames();
-            COMPort.SelectedIndex = 0;
+            COMPort.SelectedIndex = 1;
         }
     }
 }
