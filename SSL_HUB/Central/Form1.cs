@@ -22,6 +22,7 @@ namespace SSL_HUB.Central
             Radius = 200;
             FieldWidth = 6000;
             FieldHeight = 4000;
+            BallPossesedBy = -1;
             _serialWritter = new SerialPort();
             Helper.SetController(this);
 
@@ -39,6 +40,7 @@ namespace SSL_HUB.Central
         public int FieldHeight { get; private set; }
         public Keeper YellowKeeper { get; private set; }
         public Keeper BlueKeeper { get; private set; }
+        public int BallPossesedBy { get; set; }
 
         private void Move_Click(object sender, EventArgs e)
         {
@@ -132,7 +134,7 @@ namespace SSL_HUB.Central
         {
             try
             {
-                _serialWritter.PortName = textBox1.Text;
+                _serialWritter.PortName = COMPort.Text;
                 _serialWritter.BaudRate = int.Parse(textBox2.Text);
                 _serialWritter.Open();
             }
@@ -185,6 +187,12 @@ namespace SSL_HUB.Central
         private void Strategy2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            COMPort.DataSource = SerialPort.GetPortNames();
+            COMPort.SelectedIndex = 0;
         }
     }
 }

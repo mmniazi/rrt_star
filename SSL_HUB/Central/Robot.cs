@@ -10,7 +10,7 @@ namespace SSL_HUB.Central
     {
         private const double RobotRadius = 0.0875;
         private const double WheelRadius = 0.0289;
-        private const float Zero = (float) 0.000000000001;
+        private readonly Form1 _controller;
         private readonly Rrt.Rrt _rrt;
         private Thread _trackBall;
 
@@ -22,6 +22,7 @@ namespace SSL_HUB.Central
             AngularVelocity = angularVelocity;
             Moving = false;
             Path = new List<Node>();
+            _controller = controller;
             _rrt = new Rrt.Rrt(controller.Radius/10, controller.FieldWidth/10, controller.FieldHeight/10);
             new Thread(MoveRobot).Start();
         }
@@ -40,6 +41,8 @@ namespace SSL_HUB.Central
         public List<Node> Path { get; private set; }
         public float KickSpeedX { get; private set; }
         public float KickSpeedZ { get; private set; }
+        public float BallX { get; private set; }
+        public float BallY { get; private set; }
 
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
@@ -58,7 +61,7 @@ namespace SSL_HUB.Central
                 if (!Moving)
                 {
                     Thread.Sleep(10);
-                    Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero, KickSpeedX, KickSpeedZ);
+                    Helper.SendData(IsYellow, Id, 0, 0, 0, 0, KickSpeedX, KickSpeedZ);
                     KickSpeedX = 0;
                     KickSpeedZ = 0;
                 }
@@ -77,6 +80,12 @@ namespace SSL_HUB.Central
                         CurrentY = data.detection.robots_blue[Id].y;
                         CurrentAngle = data.detection.robots_blue[Id].orientation;
                     }
+
+                    BallX = data.detection.balls[0].x;
+                    BallY = data.detection.balls[0].y;
+                    /* TODO: uncomment this
+                     * SetBallPossesed();
+                     */
 
                     CalculatePath();
                     var goalX = Path.First().X;
@@ -105,8 +114,8 @@ namespace SSL_HUB.Central
                     }
                     else if (Math.Abs(Helper.Rtd(angle2 - angle1)) > 5 && Path.Count == 1)
                     {
-                        vx = Zero;
-                        vy = Zero;
+                        vx = 0;
+                        vy = 0;
                         if (Math.Sin(angle2 - angle1) > 0)
                         {
                             vw = AngularVelocity;
@@ -120,13 +129,13 @@ namespace SSL_HUB.Central
                     {
                         vx = Velocity*Math.Cos(theeta);
                         vy = Velocity*Math.Sin(theeta);
-                        vw = Zero;
+                        vw = 0;
                     }
                     else
                     {
-                        vx = Zero;
-                        vy = Zero;
-                        vw = Zero;
+                        vx = 0;
+                        vy = 0;
+                        vw = 0;
                         if (Path.Count == 1)
                         {
                             Moving = false;
@@ -161,6 +170,20 @@ namespace SSL_HUB.Central
             }
         }
 
+        private void SetBallPossesed()
+        {
+            var distance = Math.Sqrt(Math.Pow(CurrentX - BallX, 2) + Math.Pow(CurrentY - BallY, 2));
+            var dTheeta = Math.Abs(Helper.Rtd(Math.Atan2(BallY - CurrentY, BallX - CurrentX) - CurrentAngle));
+            if (distance < 200 && dTheeta < 30)
+            {
+                _controller.BallPossesedBy = (IsYellow) ? Id : Id + 6;
+            }
+            else if ((IsYellow) ? _controller.BallPossesedBy == Id : _controller.BallPossesedBy == Id + 6)
+            {
+                _controller.BallPossesedBy = -1;
+            }
+        }
+
         private void CalculatePath()
         {
             var data = Helper.GetData();
@@ -171,14 +194,7 @@ namespace SSL_HUB.Central
             obstacles.AddRange(
                 data.detection.robots_blue.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
 
-            if (IsYellow)
-            {
-                obstacles.RemoveAt(Id);
-            }
-            else
-            {
-                obstacles.RemoveAt(Id + 6);
-            }
+            obstacles.RemoveAt((IsYellow) ? Id : Id + 6);
 
             _rrt.SetConditions(new Node(ScaleDownX(CurrentX), ScaleDownY(CurrentY)),
                 new Node(ScaleDownX(GoalX), ScaleDownY(GoalY)), obstacles);

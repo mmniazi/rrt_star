@@ -43,7 +43,6 @@
             this.DefendYellow = new System.Windows.Forms.Button();
             this.DefendBlue = new System.Windows.Forms.Button();
             this.Kick = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.OpenSerial = new System.Windows.Forms.Button();
             this.CloseSerial = new System.Windows.Forms.Button();
@@ -59,6 +58,7 @@
             this.Strategy1 = new System.Windows.Forms.Button();
             this.Strategy2 = new System.Windows.Forms.Button();
             this.StopBallTracking = new System.Windows.Forms.Button();
+            this.COMPort = new System.Windows.Forms.ComboBox();
             this.SuspendLayout();
             // 
             // Stop
@@ -198,14 +198,6 @@
             this.Kick.Text = "Kick";
             this.Kick.UseVisualStyleBackColor = true;
             this.Kick.Click += new System.EventHandler(this.Kick_Click);
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(89, 175);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(100, 20);
-            this.textBox1.TabIndex = 25;
-            this.textBox1.Text = "COM10";
             // 
             // label5
             // 
@@ -348,11 +340,20 @@
             this.StopBallTracking.UseVisualStyleBackColor = true;
             this.StopBallTracking.Click += new System.EventHandler(this.StopBallTracking_Click);
             // 
+            // COMPort
+            // 
+            this.COMPort.FormattingEnabled = true;
+            this.COMPort.Location = new System.Drawing.Point(89, 173);
+            this.COMPort.Name = "COMPort";
+            this.COMPort.Size = new System.Drawing.Size(100, 21);
+            this.COMPort.TabIndex = 40;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(667, 262);
+            this.ClientSize = new System.Drawing.Size(667, 293);
+            this.Controls.Add(this.COMPort);
             this.Controls.Add(this.Strategy2);
             this.Controls.Add(this.Strategy1);
             this.Controls.Add(this.Serial);
@@ -367,7 +368,6 @@
             this.Controls.Add(this.CloseSerial);
             this.Controls.Add(this.OpenSerial);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.textBox1);
             this.Controls.Add(this.Kick);
             this.Controls.Add(this.StopBallTracking);
             this.Controls.Add(this.DefendBlue);
@@ -386,6 +386,7 @@
             this.Controls.Add(this.X);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -408,7 +409,6 @@
         private System.Windows.Forms.Button DefendYellow;
         private System.Windows.Forms.Button DefendBlue;
         private System.Windows.Forms.Button Kick;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button OpenSerial;
         private System.Windows.Forms.Button CloseSerial;
@@ -424,6 +424,7 @@
         private System.Windows.Forms.Button Strategy1;
         private System.Windows.Forms.Button Strategy2;
         private System.Windows.Forms.Button StopBallTracking;
+        private System.Windows.Forms.ComboBox COMPort;
 
     }
 }

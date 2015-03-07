@@ -51,6 +51,13 @@ namespace SSL_HUB.Central
         public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4, float kickSpeedX,
             float kickSpeedZ)
         {
+            // TODO: remove these and check affect on real system
+            const float zero = (float) 0.000000000001;
+            w1 = (w1 == 0) ? zero : w1;
+            w2 = (w2 == 0) ? zero : w2;
+            w3 = (w3 == 0) ? zero : w3;
+            w4 = (w4 == 0) ? zero : w4;
+
             var pkt = new grSim_Packet {commands = new grSim_Commands()};
             var robotCmd = new grSim_Robot_Command();
             pkt.commands.isteamyellow = isYellow;
@@ -85,7 +92,7 @@ namespace SSL_HUB.Central
 
         private static void RecieveData()
         {
-            var endPoint = new IPEndPoint(IPAddress.Any, 10020);
+            var endPoint = new IPEndPoint(IPAddress.Parse("224.5.23.2"), 10002);
             while (true)
             {
                 Thread.Sleep(10);
