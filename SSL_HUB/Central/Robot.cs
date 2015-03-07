@@ -12,6 +12,7 @@ namespace SSL_HUB.Central
         private const double WheelRadius = 0.0289;
         private const float Zero = (float) 0.000000000001;
         private readonly Rrt.Rrt _rrt;
+        private Thread _trackBall;
 
         public Robot(bool isYellow, int id, float velocity, float angularVelocity, Form1 controller)
         {
@@ -37,8 +38,8 @@ namespace SSL_HUB.Central
         public float CurrentAngle { get; private set; }
         public bool Moving { get; private set; }
         public List<Node> Path { get; private set; }
-        public float KickSpeedX { get; set; }
-        public float KickSpeedZ { get; set; }
+        public float KickSpeedX { get; private set; }
+        public float KickSpeedZ { get; private set; }
 
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
@@ -57,7 +58,7 @@ namespace SSL_HUB.Central
                 if (!Moving)
                 {
                     Thread.Sleep(10);
-                    Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero,KickSpeedX,KickSpeedZ);
+                    Helper.SendData(IsYellow, Id, Zero, Zero, Zero, Zero, KickSpeedX, KickSpeedZ);
                     KickSpeedX = 0;
                     KickSpeedZ = 0;
                 }
@@ -153,7 +154,7 @@ namespace SSL_HUB.Central
                             ((1.0/WheelRadius)*
                              (((RobotRadius*vw) - (vx*Math.Sin(motorAlpha[3])) + (vy*Math.Cos(motorAlpha[3])))));
 
-                    Helper.SendData(IsYellow, Id, v1, v2, v3, v4,KickSpeedX,KickSpeedZ);
+                    Helper.SendData(IsYellow, Id, v1, v2, v3, v4, KickSpeedX, KickSpeedZ);
                     KickSpeedX = 0;
                     KickSpeedZ = 0;
                 }
@@ -191,6 +192,75 @@ namespace SSL_HUB.Central
                     Path.Add(new Node(ScaleUpX(node.X), ScaleUpY(node.Y)));
                 }
             }
+        }
+
+        public void TrackBall()
+        {
+            if (!ReferenceEquals(null, _trackBall))
+            {
+                _trackBall.Abort();
+            }
+            _trackBall = new Thread(() =>
+            {
+                float oldGoalX = 99999;
+                float oldGoalY = 99999;
+                float oldGoalAngle = 0;
+                while (true)
+                {
+                    Thread.Sleep(10);
+                    var data = Helper.GetData();
+
+                    var currentX = (IsYellow)
+                        ? data.detection.robots_yellow[Id].x
+                        : data.detection.robots_blue[Id].x;
+                    var currentY = (IsYellow)
+                        ? data.detection.robots_yellow[Id].y
+                        : data.detection.robots_blue[Id].y;
+                    var currentAngle = (IsYellow)
+                        ? data.detection.robots_yellow[Id].orientation
+                        : data.detection.robots_blue[Id].orientation;
+                    var goalX = data.detection.balls[0].x;
+                    var goalY = data.detection.balls[0].y;
+                    var goalAngle = (float) Math.Atan2(goalY - currentY, goalX - currentX);
+
+                    var distance = Math.Sqrt(Math.Pow(goalX - oldGoalX, 2) + Math.Pow(goalY - oldGoalY, 2));
+                    var dTheeta = Math.Abs(Helper.Rtd(goalAngle - currentAngle));
+
+                    if (distance > 10 && dTheeta > 5)
+                    {
+                        SetGoal(goalX, goalY, goalAngle);
+                        oldGoalX = goalX;
+                        oldGoalY = goalY;
+                        oldGoalAngle = goalAngle;
+                    }
+                    else if (distance > 10)
+                    {
+                        SetGoal(goalX, goalY, oldGoalAngle);
+                        oldGoalX = goalX;
+                        oldGoalY = goalY;
+                    }
+                    else if (dTheeta > 5)
+                    {
+                        SetGoal(oldGoalX, oldGoalY, goalAngle);
+                        oldGoalAngle = goalAngle;
+                    }
+                }
+            });
+            _trackBall.Start();
+        }
+
+        public void StopTrackBall()
+        {
+            if (!ReferenceEquals(null, _trackBall))
+            {
+                _trackBall.Abort();
+            }
+        }
+
+        public void Kick(float x, float z)
+        {
+            KickSpeedX = x;
+            KickSpeedZ = z;
         }
 
         private static int ScaleDownX(float x)

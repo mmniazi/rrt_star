@@ -42,7 +42,6 @@
             this.IsYellow = new System.Windows.Forms.CheckBox();
             this.DefendYellow = new System.Windows.Forms.Button();
             this.DefendBlue = new System.Windows.Forms.Button();
-            this.MoveToBall = new System.Windows.Forms.Button();
             this.Kick = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -57,6 +56,9 @@
             this.label8 = new System.Windows.Forms.Label();
             this.KickSpeedZ = new System.Windows.Forms.TextBox();
             this.Serial = new System.Windows.Forms.CheckBox();
+            this.Strategy1 = new System.Windows.Forms.Button();
+            this.Strategy2 = new System.Windows.Forms.Button();
+            this.StopBallTracking = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // Stop
@@ -169,7 +171,7 @@
             // 
             // DefendYellow
             // 
-            this.DefendYellow.Location = new System.Drawing.Point(279, 151);
+            this.DefendYellow.Location = new System.Drawing.Point(279, 163);
             this.DefendYellow.Name = "DefendYellow";
             this.DefendYellow.Size = new System.Drawing.Size(75, 39);
             this.DefendYellow.TabIndex = 21;
@@ -179,7 +181,7 @@
             // 
             // DefendBlue
             // 
-            this.DefendBlue.Location = new System.Drawing.Point(279, 196);
+            this.DefendBlue.Location = new System.Drawing.Point(279, 208);
             this.DefendBlue.Name = "DefendBlue";
             this.DefendBlue.Size = new System.Drawing.Size(75, 41);
             this.DefendBlue.TabIndex = 22;
@@ -187,19 +189,9 @@
             this.DefendBlue.UseVisualStyleBackColor = true;
             this.DefendBlue.Click += new System.EventHandler(this.DefendBlue_Click);
             // 
-            // MoveToBall
-            // 
-            this.MoveToBall.Location = new System.Drawing.Point(279, 93);
-            this.MoveToBall.Name = "MoveToBall";
-            this.MoveToBall.Size = new System.Drawing.Size(75, 23);
-            this.MoveToBall.TabIndex = 23;
-            this.MoveToBall.Text = "Move to Ball";
-            this.MoveToBall.UseVisualStyleBackColor = true;
-            this.MoveToBall.Click += new System.EventHandler(this.MoveToBall_Click);
-            // 
             // Kick
             // 
-            this.Kick.Location = new System.Drawing.Point(279, 122);
+            this.Kick.Location = new System.Drawing.Point(279, 134);
             this.Kick.Name = "Kick";
             this.Kick.Size = new System.Drawing.Size(75, 23);
             this.Kick.TabIndex = 24;
@@ -326,11 +318,43 @@
             this.Serial.Text = "Serial";
             this.Serial.UseVisualStyleBackColor = true;
             // 
+            // Strategy1
+            // 
+            this.Strategy1.Location = new System.Drawing.Point(585, 8);
+            this.Strategy1.Name = "Strategy1";
+            this.Strategy1.Size = new System.Drawing.Size(75, 23);
+            this.Strategy1.TabIndex = 38;
+            this.Strategy1.Text = "Strategy 1";
+            this.Strategy1.UseVisualStyleBackColor = true;
+            this.Strategy1.Click += new System.EventHandler(this.Strategy1_Click);
+            // 
+            // Strategy2
+            // 
+            this.Strategy2.Location = new System.Drawing.Point(585, 37);
+            this.Strategy2.Name = "Strategy2";
+            this.Strategy2.Size = new System.Drawing.Size(75, 23);
+            this.Strategy2.TabIndex = 39;
+            this.Strategy2.Text = "Strategy 2";
+            this.Strategy2.UseVisualStyleBackColor = true;
+            this.Strategy2.Click += new System.EventHandler(this.Strategy2_Click);
+            // 
+            // StopBallTracking
+            // 
+            this.StopBallTracking.Location = new System.Drawing.Point(279, 93);
+            this.StopBallTracking.Name = "StopBallTracking";
+            this.StopBallTracking.Size = new System.Drawing.Size(75, 35);
+            this.StopBallTracking.TabIndex = 23;
+            this.StopBallTracking.Text = "Stop Ball Tracking";
+            this.StopBallTracking.UseVisualStyleBackColor = true;
+            this.StopBallTracking.Click += new System.EventHandler(this.StopBallTracking_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(591, 262);
+            this.ClientSize = new System.Drawing.Size(667, 262);
+            this.Controls.Add(this.Strategy2);
+            this.Controls.Add(this.Strategy1);
             this.Controls.Add(this.Serial);
             this.Controls.Add(this.KickSpeedZ);
             this.Controls.Add(this.label8);
@@ -345,7 +369,7 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.Kick);
-            this.Controls.Add(this.MoveToBall);
+            this.Controls.Add(this.StopBallTracking);
             this.Controls.Add(this.DefendBlue);
             this.Controls.Add(this.DefendYellow);
             this.Controls.Add(this.IsYellow);
@@ -383,7 +407,6 @@
         private System.Windows.Forms.CheckBox IsYellow;
         private System.Windows.Forms.Button DefendYellow;
         private System.Windows.Forms.Button DefendBlue;
-        private System.Windows.Forms.Button MoveToBall;
         private System.Windows.Forms.Button Kick;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label5;
@@ -398,6 +421,9 @@
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox KickSpeedZ;
         private System.Windows.Forms.CheckBox Serial;
+        private System.Windows.Forms.Button Strategy1;
+        private System.Windows.Forms.Button Strategy2;
+        private System.Windows.Forms.Button StopBallTracking;
 
     }
 }
