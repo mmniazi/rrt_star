@@ -40,8 +40,6 @@
             this.label4 = new System.Windows.Forms.Label();
             this.Id = new System.Windows.Forms.TextBox();
             this.IsYellow = new System.Windows.Forms.CheckBox();
-            this.DefendYellow = new System.Windows.Forms.Button();
-            this.DefendBlue = new System.Windows.Forms.Button();
             this.Kick = new System.Windows.Forms.Button();
             this.label5 = new System.Windows.Forms.Label();
             this.OpenSerial = new System.Windows.Forms.Button();
@@ -169,26 +167,6 @@
             this.IsYellow.Text = "Is Yellow";
             this.IsYellow.UseVisualStyleBackColor = true;
             // 
-            // DefendYellow
-            // 
-            this.DefendYellow.Location = new System.Drawing.Point(279, 163);
-            this.DefendYellow.Name = "DefendYellow";
-            this.DefendYellow.Size = new System.Drawing.Size(75, 39);
-            this.DefendYellow.TabIndex = 21;
-            this.DefendYellow.Text = "Defend Goal Yellow";
-            this.DefendYellow.UseVisualStyleBackColor = true;
-            this.DefendYellow.Click += new System.EventHandler(this.DefendYellow_Click);
-            // 
-            // DefendBlue
-            // 
-            this.DefendBlue.Location = new System.Drawing.Point(279, 208);
-            this.DefendBlue.Name = "DefendBlue";
-            this.DefendBlue.Size = new System.Drawing.Size(75, 41);
-            this.DefendBlue.TabIndex = 22;
-            this.DefendBlue.Text = "Defend Goal Blue";
-            this.DefendBlue.UseVisualStyleBackColor = true;
-            this.DefendBlue.Click += new System.EventHandler(this.DefendBlue_Click);
-            // 
             // Kick
             // 
             this.Kick.Location = new System.Drawing.Point(279, 134);
@@ -303,8 +281,6 @@
             // Serial
             // 
             this.Serial.AutoSize = true;
-            this.Serial.Checked = true;
-            this.Serial.CheckState = System.Windows.Forms.CheckState.Checked;
             this.Serial.Location = new System.Drawing.Point(195, 177);
             this.Serial.Name = "Serial";
             this.Serial.Size = new System.Drawing.Size(52, 17);
@@ -372,8 +348,6 @@
             this.Controls.Add(this.label5);
             this.Controls.Add(this.Kick);
             this.Controls.Add(this.StopBallTracking);
-            this.Controls.Add(this.DefendBlue);
-            this.Controls.Add(this.DefendYellow);
             this.Controls.Add(this.IsYellow);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.Id);
@@ -408,8 +382,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox Id;
         private System.Windows.Forms.CheckBox IsYellow;
-        private System.Windows.Forms.Button DefendYellow;
-        private System.Windows.Forms.Button DefendBlue;
         private System.Windows.Forms.Button Kick;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Button OpenSerial;

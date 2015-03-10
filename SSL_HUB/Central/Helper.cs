@@ -12,7 +12,6 @@ namespace SSL_HUB.Central
     internal static class Helper
     {
         private static readonly UdpClient Client;
-        private static Byte[] _data;
         private static Form1 _controller;
 
         static Helper()
@@ -20,13 +19,17 @@ namespace SSL_HUB.Central
             Client = new UdpClient {ExclusiveAddressUse = false};
             Client.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             Client.ExclusiveAddressUse = false;
-            Client.Client.Bind(new IPEndPoint(IPAddress.Any, 10002));
+            Client.Client.Bind(new IPEndPoint(IPAddress.Any, 10020));
             Client.JoinMulticastGroup(IPAddress.Parse("224.5.23.2"));
-            new Thread(RecieveData).Start();
             Spinner = true;
         }
 
         public static bool Spinner { get; set; }
+
+        public static void StartRecieving()
+        {
+            new Thread(RecieveData).Start();
+        }
 
         public static void SetController(Form1 controller)
         {
@@ -41,11 +44,6 @@ namespace SSL_HUB.Central
         public static double Rtd(double angle)
         {
             return angle*(180/Math.PI);
-        }
-
-        public static SSL_WrapperPacket GetData()
-        {
-            return Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(_data));
         }
 
         public static void SendData(bool isYellow, int id, float w1, float w2, float w3, float w4, float kickSpeedX,
@@ -118,6 +116,7 @@ namespace SSL_HUB.Central
             }
             else
             {
+                const float zero = (float) 0.000000000001;
                 var pkt = new grSim_Packet {commands = new grSim_Commands()};
                 var robotCmd = new grSim_Robot_Command();
                 pkt.commands.isteamyellow = isYellow;
@@ -130,10 +129,10 @@ namespace SSL_HUB.Central
                 robotCmd.kickspeedx = kickSpeedX;
                 robotCmd.kickspeedz = kickSpeedZ;
                 robotCmd.spinner = Spinner;
-                robotCmd.wheel1 = w1;
-                robotCmd.wheel2 = w2;
-                robotCmd.wheel3 = w3;
-                robotCmd.wheel4 = w4;
+                robotCmd.wheel1 = (Math.Abs(w1) < 0.00001) ? zero : w1;
+                robotCmd.wheel2 = (Math.Abs(w2) < 0.00001) ? zero : w2;
+                robotCmd.wheel3 = (Math.Abs(w3) < 0.00001) ? zero : w3;
+                robotCmd.wheel4 = (Math.Abs(w4) < 0.00001) ? zero : w4;
 
                 pkt.commands.robot_commands.Add(robotCmd);
 
@@ -146,14 +145,18 @@ namespace SSL_HUB.Central
 
         private static void RecieveData()
         {
-            var endPoint = new IPEndPoint(IPAddress.Parse("224.5.23.2"), 10002);
+            var endPoint = new IPEndPoint(IPAddress.Parse("224.5.23.2"), 10020);
             while (true)
             {
                 Thread.Sleep(10);
-                var data = Client.Receive(ref endPoint);
-                if (!ReferenceEquals(null, data))
+                var packet = Client.Receive(ref endPoint);
+                if (!ReferenceEquals(null, packet))
                 {
-                    _data = data;
+                    var data = Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(packet));
+                    _controller.YellowKeeper.SetCoordinates(data);
+                    _controller.BlueKeeper.SetCoordinates(data);
+                    _controller.YellowRobots.ForEach(robot => robot.SetCoordinates(data));
+                    _controller.BlueRobots.ForEach(robot => robot.SetCoordinates(data));
                 }
             }
         }

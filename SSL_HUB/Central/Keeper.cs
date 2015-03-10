@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Threading;
+using messages_robocup_ssl_wrapper;
 
 namespace SSL_HUB.Central
 {
+    // TODO: If ball is within the D go and grab it
     public class Keeper
     {
         private const double RobotRadius = 0.0875;
         private const double WheelRadius = 0.0289;
+        private readonly Form1 _controller;
 
-        public Keeper(bool isYellow, float velocity, float angularVelocity)
+        public Keeper(bool isYellow, float velocity, float angularVelocity, Form1 controller)
         {
             IsYellow = isYellow;
             Velocity = velocity;
@@ -17,6 +20,7 @@ namespace SSL_HUB.Central
             KickSpeedZ = 0;
             BallX = 0;
             BallY = 0;
+            _controller = controller;
             new Thread(Track).Start();
         }
 
@@ -33,9 +37,14 @@ namespace SSL_HUB.Central
         public float GoalY { get; private set; }
         public float GoalX { get; private set; }
         public float GoalAngle { get; private set; }
+        public SSL_WrapperPacket Data { get; private set; }
 
         private void Track()
         {
+            while (ReferenceEquals(null, Data))
+            {
+                Thread.Sleep(100);
+            }
             while (true)
             {
                 Thread.Sleep(10);
@@ -46,7 +55,7 @@ namespace SSL_HUB.Central
 
         private void FindGoal()
         {
-            var data = Helper.GetData();
+            var data = Data;
             var ballX1 = data.detection.balls[0].x;
             var ballY1 = data.detection.balls[0].y;
 
@@ -62,48 +71,93 @@ namespace SSL_HUB.Central
                 CurrentY = data.detection.robots_blue[5].y;
                 CurrentAngle = data.detection.robots_blue[5].orientation;
             }
+            var attacker = _controller.BallPossesedBy;
+            if (ReferenceEquals(null, attacker))
+            {
+                var ballAngle = Math.Atan2(ballY1 - BallY, ballX1 - BallX);
+                var angle = Helper.Rtd((ballAngle < 0) ? (float) (ballAngle + 2*Math.PI) : ballAngle);
 
-            var ballAngle = Math.Atan2(ballY1 - BallY, ballX1 - BallX);
-            var angle = Helper.Rtd((ballAngle < 0) ? (float)(ballAngle + 2 * Math.PI) : ballAngle);
-            if (IsYellow && (angle >= 90 && angle <= 270))
-            {
-                GoalY = 0;
-                GoalAngle = (float)Math.PI;
-                BallX = ballX1;
-                BallY = ballY1;
-            }
-            else if (!IsYellow && angle <= 90 && angle >= 270)
-            {
-                GoalY = 0;
-                GoalAngle = 0;
-                BallX = ballX1;
-                BallY = ballY1;
-            }
-            else if (Math.Sqrt(Math.Pow(ballX1 - BallX, 2) + Math.Pow(ballY1 - BallY, 2)) < 5)
-            {
-                GoalY = CurrentY;
-                GoalAngle = (float)(Math.Atan2(ballY1 - CurrentY, ballX1 - CurrentX));
+                if (IsYellow && (angle >= 90 && angle <= 270))
+                {
+                    GoalY = 0;
+                    GoalAngle = (float) Math.PI;
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
+                else if (!IsYellow && angle <= 90 && angle >= 270)
+                {
+                    GoalY = 0;
+                    GoalAngle = 0;
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
+                else if (Math.Sqrt(Math.Pow(ballX1 - BallX, 2) + Math.Pow(ballY1 - BallY, 2)) < 5)
+                {
+                    GoalY = 0;
+                    GoalAngle = (float) (Math.Atan2(ballY1 - CurrentY, ballX1 - CurrentX));
+                }
+                else
+                {
+                    GoalAngle = (float) (ballAngle + Math.PI);
+
+                    // Parameters for eq of ball line
+                    var a1 = ballY1 - BallY;
+                    var b1 = BallX - ballX1;
+                    var c1 = a1*BallX + b1*BallY;
+
+                    // Parameters for eq of goal line
+                    const int a2 = 700 - (-700);
+                    const int b2 = 2800 - 2800;
+                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-700;
+
+                    var det = a1*b2 - a2*b1;
+                    GoalY = (a1*c2 - a2*c1)/det;
+
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
             }
             else
             {
-                GoalAngle = (float)(ballAngle + Math.PI);
+                var ballAngle = attacker.CurrentAngle;
+                var angle = Helper.Rtd((ballAngle < 0) ? (float)(ballAngle + 2 * Math.PI) : ballAngle);
 
-                // Parameters for eq of ball line
-                var a1 = ballY1 - BallY;
-                var b1 = BallX - ballX1;
-                var c1 = a1 * BallX + b1 * BallY;
+                if (IsYellow && (angle >= 90 && angle <= 270))
+                {
+                    GoalY = 0;
+                    GoalAngle = (float)Math.PI;
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
+                else if (!IsYellow && angle <= 90 && angle >= 270)
+                {
+                    GoalY = 0;
+                    GoalAngle = 0;
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
+                else
+                {
+                    GoalAngle = (float)(ballAngle + Math.PI);
 
-                // Parameters for eq of goal line
-                const int a2 = 700 - (-700);
-                const int b2 = 2800 - 2800;
-                var c2 = a2 * ((IsYellow) ? 2800 : -2800) + b2 * -700;
+                    // Parameters for eq of ball line
+                    var a1 = Math.Sin(ballAngle);
+                    var b1 = -Math.Cos(ballAngle);
+                    var c1 = a1 * ballX1 + b1 * ballY1;
 
-                var det = a1 * b2 - a2 * b1;
-                GoalY = (a1 * c2 - a2 * c1) / det;
+                    // Parameters for eq of goal line
+                    const int a2 = 700 - (-700);
+                    const int b2 = 2800 - 2800;
+                    var c2 = a2 * ((IsYellow) ? 2800 : -2800) + b2 * -700;
 
-                BallX = ballX1;
-                BallY = ballY1;
+                    var det = a1 * b2 - a2 * b1;
+                    GoalY = (float) ((a1 * c2 - a2 * c1) / det);
+
+                    BallX = ballX1;
+                    BallY = ballY1;
+                }
             }
+
 
             GoalX = (IsYellow) ? 2800 : -2800;
 
@@ -186,6 +240,11 @@ namespace SSL_HUB.Central
             Helper.SendData(IsYellow, 5, v1, v2, v3, v4, KickSpeedX, KickSpeedZ);
             KickSpeedX = 0;
             KickSpeedZ = 0;
+        }
+
+        public void SetCoordinates(SSL_WrapperPacket data)
+        {
+            Data = data;
         }
     }
 }

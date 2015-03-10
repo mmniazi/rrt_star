@@ -4,12 +4,16 @@ using System.IO.Ports;
 using System.Linq;
 using System.Windows.Forms;
 
+// TODO: Use delegates for game strategy. -- extended to v2
+// TODO: For whole project handle ball and robot missing.
+// TODO: Handle null for all kind of data.
+
 namespace SSL_HUB.Central
 {
     public partial class Form1 : Form
     {
-        private const float Velocity = (float) 0.5;
-        private const float AngularVelocity = (float) (Math.PI/4);
+        private const float Velocity = 1;
+        private const float AngularVelocity = (float) (Math.PI/2);
         private readonly SerialPort _serialWritter;
 
         public Form1()
@@ -22,7 +26,7 @@ namespace SSL_HUB.Central
             Radius = 200;
             FieldWidth = 6000;
             FieldHeight = 4000;
-            BallPossesedBy = -1;
+            BallPossesedBy = null;
             _serialWritter = new SerialPort();
             Helper.SetController(this);
 
@@ -31,6 +35,10 @@ namespace SSL_HUB.Central
                 YellowRobots.Add(new Robot(true, i, Velocity, AngularVelocity, this));
                 BlueRobots.Add(new Robot(false, i, Velocity, AngularVelocity, this));
             }
+            YellowKeeper = new Keeper(true, Velocity, AngularVelocity, this);
+            BlueKeeper = new Keeper(false, Velocity, AngularVelocity, this);
+
+            Helper.StartRecieving();
         }
 
         public List<Robot> BlueRobots { get; private set; }
@@ -40,7 +48,7 @@ namespace SSL_HUB.Central
         public int FieldHeight { get; private set; }
         public Keeper YellowKeeper { get; private set; }
         public Keeper BlueKeeper { get; private set; }
-        public int BallPossesedBy { get; set; }
+        public Robot BallPossesedBy { get; set; }
 
         private void Move_Click(object sender, EventArgs e)
         {
@@ -64,11 +72,11 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (IsYellow.Checked)
             {
-                YellowRobots.ElementAt(id).Stop();
+                YellowRobots.ElementAt(id).Moving = false;
             }
             else
             {
-                BlueRobots.ElementAt(id).Stop();
+                BlueRobots.ElementAt(id).Moving = false;
             }
         }
 
@@ -92,22 +100,12 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (isYellow)
             {
-                YellowRobots.ElementAt(id).StopTrackBall();
+                YellowRobots.ElementAt(id).TrackingBall = false;
             }
             else
             {
-                BlueRobots.ElementAt(id).StopTrackBall();
+                BlueRobots.ElementAt(id).TrackingBall = false;
             }
-        }
-
-        private void DefendYellow_Click(object sender, EventArgs e)
-        {
-            YellowKeeper = new Keeper(true, Velocity, AngularVelocity);
-        }
-
-        private void DefendBlue_Click(object sender, EventArgs e)
-        {
-            BlueKeeper = new Keeper(false, Velocity, AngularVelocity);
         }
 
         private void Kick_Click(object sender, EventArgs e)
@@ -115,13 +113,13 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (IsYellow.Checked)
             {
-                YellowRobots.ElementAt(id)
-                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
+                YellowRobots.ElementAt(id).KickSpeedX = (float) Convert.ToDouble(KickSpeedX.Text);
+                YellowRobots.ElementAt(id).KickSpeedZ = (float) Convert.ToDouble(KickSpeedZ.Text);
             }
             else
             {
-                BlueRobots.ElementAt(id)
-                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
+                BlueRobots.ElementAt(id).KickSpeedX = (float)Convert.ToDouble(KickSpeedX.Text);
+                BlueRobots.ElementAt(id).KickSpeedZ = (float)Convert.ToDouble(KickSpeedZ.Text);
             }
         }
 
@@ -138,7 +136,7 @@ namespace SSL_HUB.Central
                 _serialWritter.BaudRate = int.Parse(textBox2.Text);
                 _serialWritter.Open();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 //                textBox3.AppendText("\nSerial Port error : " + ex.Message + "\n");
             }
@@ -150,7 +148,7 @@ namespace SSL_HUB.Central
             {
                 _serialWritter.Close();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 //                textBox3.AppendText(ex.Message + "\n");
             }
@@ -168,7 +166,7 @@ namespace SSL_HUB.Central
                     _serialWritter.Write(data.ToString());
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
 //                textBox3.AppendText("\n" + ex.Message + "\n");
             }
@@ -181,12 +179,10 @@ namespace SSL_HUB.Central
 
         private void Strategy1_Click(object sender, EventArgs e)
         {
-            
         }
 
         private void Strategy2_Click(object sender, EventArgs e)
         {
-
         }
 
         private void Form1_Load(object sender, EventArgs e)

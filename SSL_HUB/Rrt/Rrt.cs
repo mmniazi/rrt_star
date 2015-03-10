@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace SSL_HUB.Rrt
 {
+    // TODO: breaking on moving out of boundary
+    // TODO: Need further optimization to make it 90 ms.
     public class Rrt
     {
         private readonly int _edgeLength;
@@ -19,8 +21,7 @@ namespace SSL_HUB.Rrt
         private List<Node> _nearestNodes;
         private int _neighbourRadius;
         private Tree _tree;
-        // TODO: breaking on moving out of boundary
-        // TODO: Need further optimization to make it 90 ms.
+
         public Rrt(int radius, int fieldWidth, int fieldHeight)
         {
             _fieldWidth = fieldWidth;
@@ -76,7 +77,8 @@ namespace SSL_HUB.Rrt
 
         public List<Node> GetPath()
         {
-            if (_currentPath.Count == 0 || _currentPath.Last().X != _goalNode.X || _currentPath.Last().Y != _goalNode.Y || !IsValidPath())
+            if (_currentPath.Count == 0 || _currentPath.Last().X != _goalNode.X || _currentPath.Last().Y != _goalNode.Y ||
+                !IsValidPath())
             {
                 CalcPath();
                 return _currentPath;
