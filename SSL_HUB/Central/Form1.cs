@@ -19,7 +19,8 @@ namespace SSL_HUB.Central
         public Form1()
         {
             InitializeComponent();
-
+            // TODO: change to proper method
+            CheckForIllegalCrossThreadCalls = false;
 
             BlueRobots = new List<Robot>(5);
             YellowRobots = new List<Robot>(5);
@@ -100,11 +101,11 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (isYellow)
             {
-                YellowRobots.ElementAt(id).TrackingBall = false;
+                YellowRobots.ElementAt(id).StopBallTracking();
             }
             else
             {
-                BlueRobots.ElementAt(id).TrackingBall = false;
+                BlueRobots.ElementAt(id).StopBallTracking();
             }
         }
 
@@ -136,9 +137,9 @@ namespace SSL_HUB.Central
                 _serialWritter.BaudRate = int.Parse(textBox2.Text);
                 _serialWritter.Open();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-//                textBox3.AppendText("\nSerial Port error : " + ex.Message + "\n");
+                PrintErrorMessage(ex);
             }
         }
 
@@ -148,9 +149,9 @@ namespace SSL_HUB.Central
             {
                 _serialWritter.Close();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-//                textBox3.AppendText(ex.Message + "\n");
+                PrintErrorMessage(ex);
             }
         }
 
@@ -166,9 +167,9 @@ namespace SSL_HUB.Central
                     _serialWritter.Write(data.ToString());
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-//                textBox3.AppendText("\n" + ex.Message + "\n");
+                PrintErrorMessage(ex);
             }
         }
 
@@ -189,6 +190,11 @@ namespace SSL_HUB.Central
         {
             COMPort.DataSource = SerialPort.GetPortNames();
             COMPort.SelectedIndex = 1;
+        }
+
+        public void PrintErrorMessage(Exception ex)
+        {
+            textBox3.AppendText("\n" + ex.Message + "\n");
         }
     }
 }

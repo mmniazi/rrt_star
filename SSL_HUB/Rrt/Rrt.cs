@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SSL_HUB.Rrt
 {
-    // TODO: breaking on moving out of boundary
+    // TODO: handle exceptions
     // TODO: Need further optimization to make it 90 ms.
     public class Rrt
     {

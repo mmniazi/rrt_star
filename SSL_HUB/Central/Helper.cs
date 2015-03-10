@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using grSim;
+using messages_robocup_ssl_detection;
 using messages_robocup_ssl_wrapper;
 using ProtoBuf;
 
@@ -13,6 +14,7 @@ namespace SSL_HUB.Central
     {
         private static readonly UdpClient Client;
         private static Form1 _controller;
+        private static SSL_WrapperPacket _data;
 
         static Helper()
         {
@@ -22,6 +24,7 @@ namespace SSL_HUB.Central
             Client.Client.Bind(new IPEndPoint(IPAddress.Any, 10020));
             Client.JoinMulticastGroup(IPAddress.Parse("224.5.23.2"));
             Spinner = true;
+            InitializeData();
         }
 
         public static bool Spinner { get; set; }
@@ -139,7 +142,14 @@ namespace SSL_HUB.Central
                 var stream = new MemoryStream();
                 Serializer.Serialize(stream, pkt);
                 var array = stream.ToArray();
-                Client.Send(array, array.Length, new IPEndPoint(IPAddress.Broadcast, 20011));
+                try
+                {
+                    Client.Send(array, array.Length, new IPEndPoint(IPAddress.Broadcast, 20011));
+                }
+                catch (Exception ex)
+                {
+                    _controller.PrintErrorMessage(ex);
+                }
             }
         }
 
@@ -149,16 +159,116 @@ namespace SSL_HUB.Central
             while (true)
             {
                 Thread.Sleep(10);
-                var packet = Client.Receive(ref endPoint);
-                if (!ReferenceEquals(null, packet))
+                try
                 {
+                    var packet = Client.Receive(ref endPoint);
+                    if (ReferenceEquals(null, packet)) continue;
                     var data = Serializer.Deserialize<SSL_WrapperPacket>(new MemoryStream(packet));
-                    _controller.YellowKeeper.SetCoordinates(data);
-                    _controller.BlueKeeper.SetCoordinates(data);
-                    _controller.YellowRobots.ForEach(robot => robot.SetCoordinates(data));
-                    _controller.BlueRobots.ForEach(robot => robot.SetCoordinates(data));
+                    data.detection.robots_blue.ForEach(
+                        robot => _data.detection.robots_blue[(int) robot.robot_id] = robot);
+                    data.detection.robots_yellow.ForEach(
+                        robot => _data.detection.robots_yellow[(int) robot.robot_id] = robot);
+                    data.detection.balls.ForEach(ball => _data.detection.balls[0] = ball);
                 }
+                catch (Exception ex)
+                {
+                    _controller.PrintErrorMessage(ex);
+                }
+                _controller.YellowKeeper.SetCoordinates(_data);
+                _controller.BlueKeeper.SetCoordinates(_data);
+                _controller.YellowRobots.ForEach(robot => robot.SetCoordinates(_data));
+                _controller.BlueRobots.ForEach(robot => robot.SetCoordinates(_data));
             }
+        }
+
+        private static void InitializeData()
+        {
+            _data = new SSL_WrapperPacket
+            {
+                detection = new SSL_DetectionFrame
+                {
+                    robots_yellow =
+                    {
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 0,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 1,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 2,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 3,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 4,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 5,
+                            x = 0,
+                            y = 0
+                        }
+                    }
+                    ,
+                    robots_blue =
+                    {
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 0,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 1,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 2,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 3,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 4,
+                            x = 0,
+                            y = 0
+                        },
+                        new SSL_DetectionRobot
+                        {
+                            robot_id = 5,
+                            x = 0,
+                            y = 0
+                        }
+                    },
+                    balls = {new SSL_DetectionBall {x = 0, y = 0, z = 0}}
+                }
+            };
         }
     }
 }

@@ -56,7 +56,7 @@ namespace SSL_HUB.Central
         public float BallX { get; private set; }
         public float BallY { get; private set; }
         public SSL_WrapperPacket Data { get; private set; }
-        public bool TrackingBall { get; set; }
+        public bool TrackingBall { get; private set; }
 
         public void SetGoal(double goalX, double goalY, double goalAngle)
         {
@@ -209,21 +209,28 @@ namespace SSL_HUB.Central
         {
             var obstacles = new List<Node>();
             var data = Data;
-            if (IsYellow)
+            try
             {
-                obstacles.AddRange(
-                    data.detection.robots_yellow.Where(robot => robot.robot_id != Id)
-                        .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
-                obstacles.AddRange(
-                    data.detection.robots_blue.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                if (IsYellow)
+                {
+                    obstacles.AddRange(
+                        data.detection.robots_yellow.Where(robot => robot.robot_id != Id)
+                            .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                    obstacles.AddRange(
+                        data.detection.robots_blue.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                }
+                else
+                {
+                    obstacles.AddRange(
+                        data.detection.robots_blue.Where(robot => robot.robot_id != Id)
+                            .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                    obstacles.AddRange(
+                        data.detection.robots_yellow.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                }
             }
-            else
+            catch (Exception ex)
             {
-                obstacles.AddRange(
-                    data.detection.robots_blue.Where(robot => robot.robot_id != Id)
-                        .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
-                obstacles.AddRange(
-                    data.detection.robots_yellow.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                _controller.PrintErrorMessage(ex);
             }
 
             _rrt.SetConditions(new Node(ScaleDownX(CurrentX), ScaleDownY(CurrentY)),
@@ -238,23 +245,29 @@ namespace SSL_HUB.Central
 
         public void SetCoordinates(SSL_WrapperPacket data)
         {
-            Data = data;
-            if (IsYellow)
+            try
             {
-                CurrentX = data.detection.robots_yellow[Id].x;
-                CurrentY = data.detection.robots_yellow[Id].y;
-                CurrentAngle = data.detection.robots_yellow[Id].orientation;
+                Data = data;
+                if (IsYellow)
+                {
+                    CurrentX = data.detection.robots_yellow[Id].x;
+                    CurrentY = data.detection.robots_yellow[Id].y;
+                    CurrentAngle = data.detection.robots_yellow[Id].orientation;
+                }
+                else
+                {
+                    CurrentX = data.detection.robots_blue[Id].x;
+                    CurrentY = data.detection.robots_blue[Id].y;
+                    CurrentAngle = data.detection.robots_blue[Id].orientation;
+                }
+
+                BallX = data.detection.balls[0].x;
+                BallY = data.detection.balls[0].y;
             }
-            else
+            catch (Exception ex)
             {
-                CurrentX = data.detection.robots_blue[Id].x;
-                CurrentY = data.detection.robots_blue[Id].y;
-                CurrentAngle = data.detection.robots_blue[Id].orientation;
+                _controller.PrintErrorMessage(ex);
             }
-
-            BallX = data.detection.balls[0].x;
-            BallY = data.detection.balls[0].y;
-
             SetBallPossesed();
         }
 
@@ -270,6 +283,12 @@ namespace SSL_HUB.Central
             {
                 _controller.BallPossesedBy = null;
             }
+        }
+
+        public void StopBallTracking()
+        {
+            TrackingBall = false;
+            _trackBallThread = null;
         }
 
         private static int ScaleDownX(float x)
