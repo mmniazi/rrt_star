@@ -35,7 +35,7 @@ namespace SSL_HUB.Central
             TrackingBall = false;
             Path = new List<Node>();
             _controller = controller;
-            _rrt = new Rrt.Rrt(controller.Radius/10, controller.FieldWidth/10, controller.FieldHeight/10);
+            _rrt = new Rrt.Rrt(controller.Radius/10, controller.FieldWidth/10, controller.FieldHeight/10, _controller);
             new Thread(MoveRobot).Start();
         }
 
@@ -71,7 +71,7 @@ namespace SSL_HUB.Central
 
         public void TrackBall()
         {
-            if (!ReferenceEquals(null,_trackBallThread)) return;
+            if (!ReferenceEquals(null, _trackBallThread)) return;
             TrackingBall = true;
             _trackBallThread = new Thread(() =>
             {

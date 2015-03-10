@@ -1,38 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SSL_HUB.Central;
 
 namespace SSL_HUB.Rrt
 {
-    // TODO: handle exceptions
-    // TODO: Need further optimization to make it 90 ms.
     public class Rrt
     {
+        private readonly Form1 _controller;
         private readonly int _edgeLength;
         private readonly int _fieldHeight;
         private readonly int _fieldWidth;
-        private readonly bool[][] _goalPoints;
         private readonly int _iterations;
-        private readonly bool[][] _obstaclePoints;
         private readonly int _radius;
         private readonly int _tryGoalFactor;
-        private List<Node> _currentPath;
-        private Node _goalNode;
-        private List<Node> _nearestNodes;
         private int _neighbourRadius;
+        private Node _goalNode;
+        private readonly bool[][] _goalPoints;
+        private readonly bool[][] _obstaclePoints;
+        private List<Node> _currentPath;
         private Tree _tree;
 
-        public Rrt(int radius, int fieldWidth, int fieldHeight)
+        public Rrt(int radius, int fieldWidth, int fieldHeight, Form1 controller)
         {
             _fieldWidth = fieldWidth;
             _fieldHeight = fieldHeight;
+            _controller = controller;
             _radius = radius;
             _goalPoints = new bool[fieldWidth + 1][];
             _obstaclePoints = new bool[fieldWidth + 1][];
             _tryGoalFactor = 5;
             _iterations = 1;
             _neighbourRadius = 1000;
-            _nearestNodes = new List<Node>();
             _edgeLength = 50;
             _currentPath = new List<Node>();
         }
@@ -106,18 +105,18 @@ namespace SSL_HUB.Rrt
                 var randomNode = i%_tryGoalFactor == 0
                     ? _goalNode
                     : SelectRandomNode();
-                _nearestNodes = GetNearestNodes(randomNode);
+                 var nearestNodes = GetNearestNodes(randomNode);
 
-                if (_nearestNodes.Count > 200)
+                if (nearestNodes.Count > 200)
                 {
-                    _neighbourRadius = (int) DistanceBetween(randomNode, _nearestNodes.ElementAt(200));
+                    _neighbourRadius = (int) DistanceBetween(randomNode, nearestNodes.ElementAt(200));
                 }
-                else if (_nearestNodes.Count == 0)
+                else if (nearestNodes.Count == 0)
                 {
                     _neighbourRadius = 10000;
                 }
 
-                foreach (var node in _nearestNodes.Where(node => IsValidNode(randomNode, node)))
+                foreach (var node in nearestNodes.Where(node => IsValidNode(randomNode, node)))
                 {
                     var nearestNode = node;
                     var intermediateNode = randomNode;
@@ -132,7 +131,7 @@ namespace SSL_HUB.Rrt
                         _tree.Add(intermediateNode, _goalNode);
                         goalReached = true;
                     }
-                    foreach (var thisNode in _nearestNodes)
+                    foreach (var thisNode in nearestNodes)
                     {
                         var nearestNodePathLength = nearestNode.DistanceFromRoot;
                         var thisNodepathLength = thisNode.DistanceFromRoot;
@@ -338,104 +337,110 @@ namespace SSL_HUB.Rrt
             var y1 = nearestNode.Y;
             var x2 = randomNode.X;
             var y2 = randomNode.Y;
-
-            if (x1 == x2 && y1 == y2)
+            try
             {
+                if (x1 == x2 && y1 == y2)
+                {
+                    return false;
+                }
+                if (x1 > x2 && y1 > y2)
+                {
+                    for (var x = x2; x <= x1; x++)
+                    {
+                        for (var y = y2; y <= y1; y++)
+                        {
+                            if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else if (x1 > x2 && y1 < y2)
+                {
+                    for (var x = x2; x <= x1; x++)
+                    {
+                        for (var y = y2; y >= y1; y--)
+                        {
+                            if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else if (x1 < x2 && y1 > y2)
+                {
+                    for (var x = x2; x >= x1; x--)
+                    {
+                        for (var y = y2; y <= y1; y++)
+                        {
+                            if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else if (x1 < x2 && y1 < y2)
+                {
+                    for (var x = x2; x >= x1; x--)
+                    {
+                        for (var y = y2; y >= y1; y--)
+                        {
+                            if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                else if (x1 == x2 && y1 > y2)
+                {
+                    for (var y = y2; y <= y1; y++)
+                    {
+                        if (_obstaclePoints[x1][y])
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (x1 == x2 && y1 < y2)
+                {
+                    for (var y = y2; y >= y1; y--)
+                    {
+                        if (_obstaclePoints[x1][y])
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (x1 > x2 && y1 == y2)
+                {
+                    for (var x = x2; x <= x1; x++)
+                    {
+                        if (_obstaclePoints[x][y1])
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else if (x1 < x2 && y1 == y2)
+                {
+                    for (var x = x2; x >= x1; x--)
+                    {
+                        if (_obstaclePoints[x][y1])
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _controller.PrintErrorMessage(ex);
                 return false;
             }
-            if (x1 > x2 && y1 > y2)
-            {
-                for (var x = x2; x <= x1; x++)
-                {
-                    for (var y = y2; y <= y1; y++)
-                    {
-                        if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            else if (x1 > x2 && y1 < y2)
-            {
-                for (var x = x2; x <= x1; x++)
-                {
-                    for (var y = y2; y >= y1; y--)
-                    {
-                        if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            else if (x1 < x2 && y1 > y2)
-            {
-                for (var x = x2; x >= x1; x--)
-                {
-                    for (var y = y2; y <= y1; y++)
-                    {
-                        if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            else if (x1 < x2 && y1 < y2)
-            {
-                for (var x = x2; x >= x1; x--)
-                {
-                    for (var y = y2; y >= y1; y--)
-                    {
-                        if (((x - x1)/(x1 - x2)) == ((y - y1)/(y1 - y2)) && _obstaclePoints[x][y])
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            else if (x1 == x2 && y1 > y2)
-            {
-                for (var y = y2; y <= y1; y++)
-                {
-                    if (_obstaclePoints[x1][y])
-                    {
-                        return false;
-                    }
-                }
-            }
-            else if (x1 == x2 && y1 < y2)
-            {
-                for (var y = y2; y >= y1; y--)
-                {
-                    if (_obstaclePoints[x1][y])
-                    {
-                        return false;
-                    }
-                }
-            }
-            else if (x1 > x2 && y1 == y2)
-            {
-                for (var x = x2; x <= x1; x++)
-                {
-                    if (_obstaclePoints[x][y1])
-                    {
-                        return false;
-                    }
-                }
-            }
-            else if (x1 < x2 && y1 == y2)
-            {
-                for (var x = x2; x >= x1; x--)
-                {
-                    if (_obstaclePoints[x][y1])
-                    {
-                        return false;
-                    }
-                }
-            }
-
             return true;
         }
 
