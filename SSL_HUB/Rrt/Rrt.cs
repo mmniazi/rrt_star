@@ -491,11 +491,18 @@ namespace SSL_HUB.Rrt
             var node = end;
             while (true)
             {
-                node = node.Parent;
-                path.Add(node);
-                if (node.Parent == _tree.Root)
+                try
                 {
-                    return path;
+                    node = node.Parent;
+                    path.Add(node);
+                    if (node.Parent == _tree.Root)
+                    {
+                        return path;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _controller.PrintErrorMessage(ex);
                 }
             }
         }
