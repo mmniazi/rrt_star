@@ -125,9 +125,9 @@ namespace SSL_HUB.Central
                     var c1 = a1*BallXOld + b1*BallYOld;
 
                     // Parameters for eq of goal line
-                    const int a2 = 700 - (-700);
+                    const int a2 = 375 - (-375);
                     const int b2 = 2800 - 2800;
-                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-700;
+                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-375;
 
                     var det = a1*b2 - a2*b1;
                     GoalY = (a1 * c2 - a2 * c1) / det;
@@ -150,7 +150,7 @@ namespace SSL_HUB.Central
                     BallXOld = BallX;
                     BallYOld = BallY;
                 }
-                else if (!IsYellow && angle <= 90 && angle >= 270)
+                else if (!IsYellow && (angle <= 90 || angle >= 270))
                 {
                     GoalY = 0;
                     GoalX = (IsYellow) ? 2800 : -2800;
@@ -168,9 +168,9 @@ namespace SSL_HUB.Central
                     var c1 = a1*BallX + b1*BallY;
 
                     // Parameters for eq of goal line
-                    const int a2 = 700 - (-700);
+                    const int a2 = 375 - (-375);
                     const int b2 = 2800 - 2800;
-                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-700;
+                    var c2 = a2*((IsYellow) ? 2800 : -2800) + b2*-375;
 
                     var det = a1*b2 - a2*b1;
                     GoalY = (float)((a1 * c2 - a2 * c1) / det);
@@ -181,13 +181,13 @@ namespace SSL_HUB.Central
                 }
             }
 
-            if (GoalY < -700)
+            if (GoalY < -375)
             {
-                GoalY = -700;
+                GoalY = -375;
             }
-            else if (GoalY > 700)
+            else if (GoalY > 375)
             {
-                GoalY = 700;
+                GoalY = 375;
             }
         }
 
