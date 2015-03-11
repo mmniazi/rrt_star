@@ -49,10 +49,10 @@ namespace SSL_HUB.Central
         public float CurrentX { get; private set; }
         public float CurrentY { get; private set; }
         public float CurrentAngle { get; private set; }
-        public bool Moving { get; set; }
+        public bool Moving { get; private set; }
         public List<Node> Path { get; private set; }
-        public float KickSpeedX { get; set; }
-        public float KickSpeedZ { get; set; }
+        public float KickSpeedX { get; private set; }
+        public float KickSpeedZ { get; private set; }
         public float BallX { get; private set; }
         public float BallY { get; private set; }
         public SSL_WrapperPacket Data { get; private set; }
@@ -113,6 +113,58 @@ namespace SSL_HUB.Central
                 Stop();
             });
             _trackBallThread.Start();
+        }
+
+        public void SetCoordinates(SSL_WrapperPacket data)
+        {
+            try
+            {
+                Data = data;
+                if (IsYellow)
+                {
+                    CurrentX = data.detection.robots_yellow[Id].x;
+                    CurrentY = data.detection.robots_yellow[Id].y;
+                    CurrentAngle = data.detection.robots_yellow[Id].orientation;
+                }
+                else
+                {
+                    CurrentX = data.detection.robots_blue[Id].x;
+                    CurrentY = data.detection.robots_blue[Id].y;
+                    CurrentAngle = data.detection.robots_blue[Id].orientation;
+                }
+
+                BallX = data.detection.balls[0].x;
+                BallY = data.detection.balls[0].y;
+            }
+            catch (Exception ex)
+            {
+                _controller.PrintErrorMessage(ex);
+            }
+            SetBallPossesed();
+        }
+
+        public void StopBallTracking()
+        {
+            TrackingBall = false;
+            _trackBallThread = null;
+        }
+
+        public void StopMoving()
+        {
+            Moving = false;
+        }
+
+        public void Kick(float x, float z)
+        {
+            if (!Moving)
+            {
+                Helper.SendData(IsYellow,Id,0,0,0,0,x,z);
+            }
+            else
+            {
+                KickSpeedX = x;
+                KickSpeedZ = z;
+            }
         }
 
         private void MoveRobot()
@@ -243,34 +295,6 @@ namespace SSL_HUB.Central
             Path.AddRange(scaledPath.Select(node => new Node(ScaleUpX(node.X), ScaleUpY(node.Y))));
         }
 
-        public void SetCoordinates(SSL_WrapperPacket data)
-        {
-            try
-            {
-                Data = data;
-                if (IsYellow)
-                {
-                    CurrentX = data.detection.robots_yellow[Id].x;
-                    CurrentY = data.detection.robots_yellow[Id].y;
-                    CurrentAngle = data.detection.robots_yellow[Id].orientation;
-                }
-                else
-                {
-                    CurrentX = data.detection.robots_blue[Id].x;
-                    CurrentY = data.detection.robots_blue[Id].y;
-                    CurrentAngle = data.detection.robots_blue[Id].orientation;
-                }
-
-                BallX = data.detection.balls[0].x;
-                BallY = data.detection.balls[0].y;
-            }
-            catch (Exception ex)
-            {
-                _controller.PrintErrorMessage(ex);
-            }
-            SetBallPossesed();
-        }
-
         private void SetBallPossesed()
         {
             var distance = Math.Sqrt(Math.Pow(CurrentX - BallX, 2) + Math.Pow(CurrentY - BallY, 2));
@@ -283,12 +307,6 @@ namespace SSL_HUB.Central
             {
                 _controller.BallPossesedBy = null;
             }
-        }
-
-        public void StopBallTracking()
-        {
-            TrackingBall = false;
-            _trackBallThread = null;
         }
 
         private static int ScaleDownX(float x)
@@ -311,7 +329,7 @@ namespace SSL_HUB.Central
             return y*10 - 2000;
         }
 
-        public void Stop()
+        private void Stop()
         {
             Moving = false;
             Helper.SendData(IsYellow, Id, 0, 0, 0, 0, KickSpeedX, KickSpeedZ);

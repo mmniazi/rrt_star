@@ -5,8 +5,6 @@ using System.Linq;
 using System.Windows.Forms;
 
 // TODO: Use delegates for game strategy. -- extended to v2
-// TODO: For whole project handle ball and robot missing.
-// TODO: Handle null for all kind of data.
 
 namespace SSL_HUB.Central
 {
@@ -19,8 +17,6 @@ namespace SSL_HUB.Central
         public Form1()
         {
             InitializeComponent();
-            // TODO: change to proper method
-            CheckForIllegalCrossThreadCalls = false;
 
             BlueRobots = new List<Robot>(5);
             YellowRobots = new List<Robot>(5);
@@ -73,11 +69,11 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (IsYellow.Checked)
             {
-                YellowRobots.ElementAt(id).Moving = false;
+                YellowRobots.ElementAt(id).StopMoving();
             }
             else
             {
-                BlueRobots.ElementAt(id).Moving = false;
+                BlueRobots.ElementAt(id).StopMoving();
             }
         }
 
@@ -114,13 +110,13 @@ namespace SSL_HUB.Central
             var id = Convert.ToInt32(Id.Text);
             if (IsYellow.Checked)
             {
-                YellowRobots.ElementAt(id).KickSpeedX = (float) Convert.ToDouble(KickSpeedX.Text);
-                YellowRobots.ElementAt(id).KickSpeedZ = (float) Convert.ToDouble(KickSpeedZ.Text);
+                YellowRobots.ElementAt(id)
+                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
             }
             else
             {
-                BlueRobots.ElementAt(id).KickSpeedX = (float)Convert.ToDouble(KickSpeedX.Text);
-                BlueRobots.ElementAt(id).KickSpeedZ = (float)Convert.ToDouble(KickSpeedZ.Text);
+                BlueRobots.ElementAt(id)
+                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
             }
         }
 
@@ -194,7 +190,7 @@ namespace SSL_HUB.Central
 
         public void PrintErrorMessage(Exception ex)
         {
-            textBox3.AppendText("\n" + ex.Message + "\n");
+            Invoke((MethodInvoker) delegate { textBox3.AppendText("\n" + ex.Message + "\n"); });
         }
     }
 }
