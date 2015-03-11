@@ -5,6 +5,7 @@ using SSL_HUB.Central;
 
 namespace SSL_HUB.Rrt
 {
+    // TODO: when robot gets out of field handle exception by asking it to go back to center of field
     public class Rrt
     {
         private readonly Form1 _controller;

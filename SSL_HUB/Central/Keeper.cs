@@ -106,6 +106,7 @@ namespace SSL_HUB.Central
                 else if (Math.Sqrt(Math.Pow(BallX - BallXOld, 2) + Math.Pow(BallY - BallYOld, 2)) < 5)
                 {
                     GoalY = 0;
+                    GoalX = (IsYellow) ? 2800 : -2800;
                     GoalAngle = (float) (Math.Atan2(BallY - CurrentY, BallX - CurrentX));
                     if (Math.Sqrt(Math.Pow(BallX - ((IsYellow) ? 3000 : -3000), 2) + Math.Pow(BallY - 0, 2)) < 500)
                     {
