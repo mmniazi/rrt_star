@@ -25,6 +25,7 @@ namespace SSL_HUB.Central
             FieldHeight = 4000;
             BallPossesedBy = null;
             _serialWritter = new SerialPort();
+            Strategy = new List<Action>();
             Helper.SetController(this);
 
             for (var i = 0; i < 5; i++)
@@ -38,6 +39,7 @@ namespace SSL_HUB.Central
             Helper.StartRecieving();
         }
 
+        public List<Action> Strategy { get; private set; }
         public List<Robot> BlueRobots { get; private set; }
         public List<Robot> YellowRobots { get; private set; }
         public int Radius { get; private set; }
@@ -56,11 +58,11 @@ namespace SSL_HUB.Central
 
             if (IsYellow.Checked)
             {
-                YellowRobots.ElementAt(id).SetGoal(x, y, angle);
+                YellowRobots.ElementAt(id).SetGoal(x, y, angle, 0, 0);
             }
             else
             {
-                BlueRobots.ElementAt(id).SetGoal(x, y, angle);
+                BlueRobots.ElementAt(id).SetGoal(x, y, angle, 0, 0);
             }
         }
 
@@ -108,16 +110,9 @@ namespace SSL_HUB.Central
         private void Kick_Click(object sender, EventArgs e)
         {
             var id = Convert.ToInt32(Id.Text);
-            if (IsYellow.Checked)
-            {
-                YellowRobots.ElementAt(id)
-                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
-            }
-            else
-            {
-                BlueRobots.ElementAt(id)
-                    .Kick((float) Convert.ToDouble(KickSpeedX.Text), (float) Convert.ToDouble(KickSpeedZ.Text));
-            }
+            var robot = (IsYellow.Checked) ? YellowRobots.ElementAt(id) : BlueRobots.ElementAt(id);
+            robot.SetGoal(robot.CurrentX, robot.CurrentY, robot.CurrentAngle, Convert.ToDouble(KickSpeedX.Text),
+                Convert.ToDouble(KickSpeedZ.Text));
         }
 
         private void Spinner_CheckedChanged(object sender, EventArgs e)
@@ -176,6 +171,28 @@ namespace SSL_HUB.Central
 
         private void Strategy1_Click(object sender, EventArgs e)
         {
+            var robot1 = BlueRobots.ElementAt(0);
+            var robot2 = BlueRobots.ElementAt(1);
+            var robot3 = BlueRobots.ElementAt(2);
+            Strategy.Clear();
+            Strategy.AddRange(new List<Action>
+            {
+                () => robot1.TrackBall(),
+                () =>
+                {
+                    robot1.SetGoal(0, 0, Helper.Dtr(-45), 0, 0);
+                    robot2.SetGoal(750, -750, Helper.Dtr(135), 0, 0);
+                    robot3.SetGoal(2250, 750, Helper.Dtr(225), 0, 0);
+                },
+                () => { },
+                () => { },
+                () => robot1.SetGoal(0, 0, Helper.Dtr(-45), 5, 0),
+                () => robot2.SetGoal(750, -750, Helper.Dtr(45), 0, 0),
+                () => robot2.SetGoal(750, -750, Helper.Dtr(45), 5, 0),
+                () => robot3.SetGoal(2250, 750, Helper.Dtr(-45), 0, 0),
+                () => robot3.SetGoal(2250, 750, Helper.Dtr(-45), 5, 0)
+            });
+            Strategy.First().Invoke();
         }
 
         private void Strategy2_Click(object sender, EventArgs e)
@@ -191,6 +208,13 @@ namespace SSL_HUB.Central
         public void PrintErrorMessage(Exception ex)
         {
             Invoke((MethodInvoker) delegate { textBox3.AppendText("\n" + ex.Message + "\n"); });
+        }
+
+        public void InvokeNextMove()
+        {
+            if (Strategy.Count <= 1) return;
+            Strategy.RemoveAt(0);
+            Strategy.First().Invoke();
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using messages_robocup_ssl_detection;
 using messages_robocup_ssl_wrapper;
 using SSL_HUB.Rrt;
 
@@ -9,6 +10,8 @@ namespace SSL_HUB.Central
 {
     public class Robot
     {
+        // TODO: Stop on grabbing ball
+
         private const double RobotRadius = 0.0875;
         private const double WheelRadius = 0.0289;
         private readonly Form1 _controller;
@@ -58,15 +61,18 @@ namespace SSL_HUB.Central
         public SSL_WrapperPacket Data { get; private set; }
         public bool TrackingBall { get; private set; }
 
-        public void SetGoal(double goalX, double goalY, double goalAngle)
+        public void SetGoal(double goalX, double goalY, double goalAngle, double kickSpeedX, double kickSpeedZ)
         {
             GoalX = (float) goalX;
             GoalY = (float) goalY;
             GoalAngle = (float) goalAngle;
-
-            if (Moving) return;
-            Moving = true;
-            new Thread(MoveRobot).Start();
+            KickSpeedX = (float) kickSpeedX;
+            KickSpeedZ = (float) kickSpeedZ;
+            if (!Moving)
+            {
+                Moving = true;
+                new Thread(MoveRobot).Start();
+            }
         }
 
         public void TrackBall()
@@ -90,27 +96,32 @@ namespace SSL_HUB.Central
 
                     var distance = Math.Sqrt(Math.Pow(goalX - oldGoalX, 2) + Math.Pow(goalY - oldGoalY, 2));
                     var dTheeta = Math.Abs(Helper.Rtd(goalAngle - currentAngle));
+                    var distanceToBall = Math.Sqrt(Math.Pow(goalX - currentX, 2) + Math.Pow(goalY - currentY, 2));
 
                     if (distance > 10 && dTheeta > 5)
                     {
-                        SetGoal(goalX, goalY, goalAngle);
+                        SetGoal(goalX, goalY, goalAngle, 0, 0);
                         oldGoalX = goalX;
                         oldGoalY = goalY;
                         oldGoalAngle = goalAngle;
                     }
                     else if (distance > 10)
                     {
-                        SetGoal(goalX, goalY, oldGoalAngle);
+                        SetGoal(goalX, goalY, oldGoalAngle, 0, 0);
                         oldGoalX = goalX;
                         oldGoalY = goalY;
                     }
                     else if (dTheeta > 5)
                     {
-                        SetGoal(oldGoalX, oldGoalY, goalAngle);
+                        SetGoal(oldGoalX, oldGoalY, goalAngle, 0, 0);
                         oldGoalAngle = goalAngle;
                     }
+                    if (distanceToBall <= 120 && dTheeta < 45)
+                    {
+                        TrackingBall = false;
+                        Moving = false;
+                    }
                 }
-                Stop();
             });
             _trackBallThread.Start();
         }
@@ -152,19 +163,6 @@ namespace SSL_HUB.Central
         public void StopMoving()
         {
             Moving = false;
-        }
-
-        public void Kick(float x, float z)
-        {
-            if (!Moving)
-            {
-                Helper.SendData(IsYellow,Id,0,0,0,0,x,z);
-            }
-            else
-            {
-                KickSpeedX = x;
-                KickSpeedZ = z;
-            }
         }
 
         private void MoveRobot()
@@ -260,24 +258,25 @@ namespace SSL_HUB.Central
         private void CalculatePath()
         {
             var obstacles = new List<Node>();
-            var data = Data;
             try
             {
+                var yellowRobots = new List<SSL_DetectionRobot>(Data.detection.robots_yellow);
+                var blueRobots = new List<SSL_DetectionRobot>(Data.detection.robots_blue);
                 if (IsYellow)
                 {
                     obstacles.AddRange(
-                        data.detection.robots_yellow.Where(robot => robot.robot_id != Id)
+                        yellowRobots.Where(robot => robot.robot_id != Id)
                             .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
                     obstacles.AddRange(
-                        data.detection.robots_blue.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                        blueRobots.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
                 }
                 else
                 {
                     obstacles.AddRange(
-                        data.detection.robots_blue.Where(robot => robot.robot_id != Id)
+                        blueRobots.Where(robot => robot.robot_id != Id)
                             .Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
                     obstacles.AddRange(
-                        data.detection.robots_yellow.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
+                        yellowRobots.Select(robot => new Node(ScaleDownX(robot.x), ScaleDownY(robot.y))));
                 }
             }
             catch (Exception ex)
@@ -299,7 +298,7 @@ namespace SSL_HUB.Central
         {
             var distance = Math.Sqrt(Math.Pow(CurrentX - BallX, 2) + Math.Pow(CurrentY - BallY, 2));
             var dTheeta = Math.Abs(Helper.Rtd(Math.Atan2(BallY - CurrentY, BallX - CurrentX) - CurrentAngle));
-            if (distance < 200 && dTheeta < 45)
+            if (distance < 120 && dTheeta < 45)
             {
                 _controller.BallPossesedBy = this;
             }
@@ -335,6 +334,7 @@ namespace SSL_HUB.Central
             Helper.SendData(IsYellow, Id, 0, 0, 0, 0, KickSpeedX, KickSpeedZ);
             KickSpeedX = 0;
             KickSpeedZ = 0;
+            _controller.InvokeNextMove();
         }
     }
 }

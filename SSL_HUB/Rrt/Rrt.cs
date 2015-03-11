@@ -464,8 +464,9 @@ namespace SSL_HUB.Rrt
         {
             var nearestNodes = new Dictionary<Node, Double>();
 
-            foreach (var treeNode in _tree.NodeList)
+            for (var i = _tree.NodeList.Count - 1; i >= 0; i--)
             {
+                var treeNode = _tree.NodeList[i];
                 var distance = DistanceBetween(treeNode, node);
                 var pathLength = treeNode.DistanceFromRoot;
                 if (distance < _neighbourRadius)
